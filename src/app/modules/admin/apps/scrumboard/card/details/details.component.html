@@ -1,0 +1,279 @@
+<div class="flex flex-col flex-auto -m-6">
+
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 shadow">
+        <div class="flex items-center gap-3">
+            <mat-icon class="text-blue-500" svgIcon="heroicons_outline:bookmark"></mat-icon>
+            <div>Feature</div>
+        </div>
+        <div class="flex items-center gap-3">
+            <mat-icon class="text-green-500" svgIcon="heroicons_outline:check-circle"></mat-icon>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Card form -->
+    <form class="flex flex-col flex-0 items-start w-full p-6 sm:p-8 space-y-6 overflow-y-auto" [formGroup]="cardForm">
+
+        <div class="grid grid-cols-3 gap-4 w-full">
+            <div class="col-span-2 max-h-200 px-3 overflow-y-scroll">
+
+                <!-- Title -->
+                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full mb-3">
+                    <mat-label>Title</mat-label>
+                    <textarea matInput [formControlName]="'title'" [rows]="1" cdkTextareaAutosize
+                        [cdkAutosizeMinRows]="1">
+            </textarea>
+                </mat-form-field>
+
+                <!-- Description -->
+                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full mb-3">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput [formControlName]="'description'" [rows]="3" cdkTextareaAutosize
+                        [placeholder]="'Add a description...'" [cdkAutosizeMinRows]="3">
+            </textarea>
+                </mat-form-field>
+
+                <div class="flex flex-wrap gap-3 mb-3">
+
+                    <button class="" mat-stroked-button>
+                        <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:document-add'"></mat-icon>
+                        Attach
+                    </button>
+
+                    <button class="" mat-stroked-button>
+                        <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:adjustments'"></mat-icon>
+                        Child Issue
+                    </button>
+
+                    <button class="" mat-stroked-button>
+                        <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:link'"></mat-icon>
+                        Web link
+                    </button>
+
+                </div>
+
+                <div class="attachments mb-3">
+                    <div class="font-medium">Attachments</div>
+
+                    <div class=" flex flex-wrap gap-3">
+                        <a class="flex flex-col w-40 h-40 p-4 shadow rounded-2xl cursor-pointer bg-card">
+                            <div class="aspect-[9/6]">
+                                <div class="flex items-center justify-center h-full">
+                                    <!-- Icons -->
+                                    <div class="relative">
+                                        <mat-icon class="icon-size-14 text-hint opacity-50"
+                                            [svgIcon]="'heroicons_solid:document'"></mat-icon>
+                                        <div class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
+                                            [class.bg-red-600]="true">
+                                            {{'pdf'.toUpperCase()}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
+                                <div class="truncate" [matTooltip]="'Filename.doc'">File name</div>
+                            </div>
+                        </a>
+
+                        <a class="flex flex-col w-40 h-40 p-4 shadow rounded-2xl cursor-pointer bg-card">
+                            <div class="aspect-[9/6]">
+                                <div class="flex items-center justify-center h-full">
+                                    <!-- Icons -->
+                                    <div class="relative">
+                                        <mat-icon class="icon-size-14 text-hint opacity-50"
+                                            [svgIcon]="'heroicons_solid:document'"></mat-icon>
+                                        <div class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
+                                            [class.bg-blue-600]="true">
+                                            {{'doc'.toUpperCase()}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
+                                <div class="truncate" [matTooltip]="'Filename.doc'">File name</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="child-issues mb-3">
+                    <div class="font-medium">Child issues</div>
+
+                    <div class="flex justify-between w-full p-4 shadow rounded-sm cursor-pointer">
+                        <div class="flex gap-4 items-center">
+                            <mat-icon svgIcon="heroicons_outline:bookmark"></mat-icon>
+                            <span class="truncate">Issue for test</span>
+                        </div>
+                        <div class="flex gap-4 items-center">
+                            <mat-icon svgIcon="mat_outline:menu"></mat-icon>
+                            <div class="flex gap-2">
+                                <mat-icon svgIcon="heroicons_outline:user-circle"></mat-icon>
+                                <span>Janglee</span>
+                            </div>
+                            <div class="flex items-center bg-green-500 rounded-lg shadow px-2">
+                                <span class="text-white text-sm">Done</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="web-links mb-3">
+                    <div class="font-medium">Web links</div>
+
+                    <div class="flex justify-between w-full p-4 shadow rounded-sm cursor-pointer">
+                        <div class="flex gap-4 items-center">
+                            <mat-icon svgIcon="heroicons_outline:external-link"></mat-icon>
+                            <span class="truncate">Some description for this link</span>
+                        </div>
+                        <div class="flex text-center">
+                            <mat-icon class="text-red-500" svgIcon="heroicons_outline:x"></mat-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="activity">
+                    <div class="font-medium mb-3">Activity</div>
+                    <mat-tab-group animationDuration="0ms">
+
+                        <mat-tab label="Comments">
+                            <div class="mt-3">
+                                <div class="mb-3">
+                                    <div class="italic">No comment</div>
+                                </div>
+                                <div class="flex gap-3 justify-between items-center">
+                                    <mat-icon class="icon-size-12" svgIcon="heroicons_outline:user-circle"></mat-icon>
+                                    <div class="w-full">
+                                        <!-- Comment -->
+                                        <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
+                                            <textarea matInput [formControlName]="'title'" [rows]="1"
+                                                cdkTextareaAutosize [cdkAutosizeMinRows]="1"></textarea>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end mt-3">
+                                    <button mat-flat-button [color]="'primary'">
+                                        Comment
+                                    </button>
+                                </div>
+                            </div>
+                        </mat-tab>
+
+                        <mat-tab label="Work log">
+                            <!-- Work log content -->
+                        </mat-tab>
+
+                    </mat-tab-group>
+                </div>
+
+            </div>
+            <div class="col-span-1 max-h-200 px-3 overflow-y-scroll">
+                <mat-form-field class="w-full">
+                    <mat-label>Status</mat-label>
+                    <mat-select>
+                        <mat-option [value]="'Haha'">
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="w-full">
+                    <mat-label>Assignee</mat-label>
+                    <mat-select>
+                        <mat-option [value]="'Haha'">
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="w-full">
+                    <mat-label>Priority</mat-label>
+                    <mat-select>
+                        <mat-option [value]="'Haha'">
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Due date -->
+                <div class="mb-3">
+                    <div class="font-medium">Due date</div>
+                    <div class="relative flex items-center mt-1.5 px-4 leading-9 rounded-full cursor-pointer"
+                        [ngClass]="{'text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700': !issue.dueDate,
+                                            'text-green-800 bg-green-200 dark:text-green-100 dark:bg-green-500': issue.dueDate && !isOverdue(issue.dueDate),
+                                            'text-red-800 bg-red-200 dark:text-red-100 dark:bg-red-500': issue.dueDate && isOverdue(issue.dueDate)}" (click)="dueDatePicker.open()">
+                        <mat-icon class="icon-size-5 text-current" [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                        <span class="ml-2 text-md font-medium">
+                            <ng-container *ngIf="issue.dueDate">{{issue.dueDate | date:'longDate'}}</ng-container>
+                            <ng-container *ngIf="!issue.dueDate">Not set</ng-container>
+                        </span>
+                        <mat-form-field
+                            class="fuse-mat-no-subscript fuse-mat-dense invisible absolute inset-0 -mt-2.5 opacity-0 pointer-events-none">
+                            <input matInput [formControlName]="'dueDate'" [matDatepicker]="dueDatePicker">
+                            <mat-datepicker #dueDatePicker>
+                                <mat-datepicker-actions>
+                                    <button mat-button (click)="cardForm.get('dueDate').setValue(null)"
+                                        matDatepickerCancel>
+                                        Clear
+                                    </button>
+                                    <button mat-flat-button [color]="'primary'" matDatepickerApply>
+                                        Select
+                                    </button>
+                                </mat-datepicker-actions>
+                            </mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Labels -->
+                <div class="w-full mb-3">
+                    <div class="font-medium">Labels</div>
+                    <div class="mt-1 rounded-md border border-gray-300 shadow-sm overflow-hidden">
+                        <!-- Header -->
+                        <div class="flex items-center my-2 mx-3">
+                            <div class="flex items-center flex-auto min-w-0">
+                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                <input class="min-w-0 ml-2 py-1 border-0" type="text" placeholder="Enter label name"
+                                    (input)="filterLabels($event)" (keydown)="filterLabelsInputKeyDown($event)"
+                                    [maxLength]="50">
+                            </div>
+                        </div>
+                        <!-- Available labels -->
+                        <div class="max-h-40 leading-none overflow-y-auto border-t">
+                            <!-- Labels -->
+                            <ng-container *ngFor="let label of filteredLabels; trackBy: trackByFn">
+                                <mat-checkbox class="flex items-center h-10 min-h-10 px-4" [color]="'primary'"
+                                    [checked]="hasLabel(label)" (change)="toggleProductTag(label, $event)">
+                                    {{label.title}}
+                                </mat-checkbox>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+
+                <mat-form-field class="w-full">
+                    <mat-label>Reporter</mat-label>
+                    <mat-select>
+                        <mat-option [value]="'Haha'">
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="time-lapse">
+                    <div>
+                        <span>Created </span><span>1 time</span>
+                    </div>
+                    <div>
+                        <span>Updated </span><span>1 time</span>
+                    </div>
+                    <div>
+                        <span>Resolved </span><span>1 time</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </form>
+
+</div>
