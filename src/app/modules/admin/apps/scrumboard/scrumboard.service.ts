@@ -1,4 +1,4 @@
-import { Project, Issue, Status } from './kanban.model';
+import { Issue, Project, Status } from './kanban.model';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
@@ -121,6 +121,27 @@ export class ScrumboardService {
 
                     // Update the boards with the new board
                     this._boards.next([...boards, newBoard]);
+
+                    // Return new board from observable
+                    return newBoard;
+                })
+            ))
+        );
+    }
+
+    /**
+ * Create project
+ *
+ * @param board
+ */
+    createProject(board: Project): Observable<Project> {
+        return this.projects$.pipe(
+            take(1),
+            switchMap(boards => this._httpClient.post<Project>('/api/projects', board).pipe(
+                map((newBoard) => {
+
+                    // Update the boards with the new board
+                    this._projects.next([...boards, newBoard]);
 
                     // Return new board from observable
                     return newBoard;
@@ -308,15 +329,14 @@ export class ScrumboardService {
                 // Delete the list
                 project.statuses.splice(index, 1);
 
-                this.getList(inheritanceId).subscribe(result => {
-                    console.log(result);
-                });
+                this.getList(inheritanceId).subscribe();
 
                 // Sort the project statuses
                 project.statuses.sort((a, b) => a.position - b.position);
 
                 // Update the project
                 this._project.next(project);
+
             })
         );
     }
@@ -380,12 +400,41 @@ export class ScrumboardService {
     }
 
     /**
+ * Create sub card
+ *
+ * @param card
+ */
+    createSubCard(card: Issue): Observable<Issue> {
+        return this._httpClient.post<Issue>('/api/issues/child', card).pipe(
+            map(response => new Issue(response)),
+            tap((newCard) => {
+
+                // Get the project value
+                const project = this._project.value;
+
+                // Find the list and push the new card in it
+                project.statuses.forEach((listItem, index, list) => {
+                    if (listItem.id === newCard.statusId) {
+                        list[index].issues.push(newCard);
+                    }
+                });
+
+                // Update the project
+                this._project.next(project);
+
+                // Return the new card
+                return newCard;
+            })
+        );
+    }
+
+    /**
      * Update the card
      *
      * @param id
      * @param card
      */
-    updateCard(id: string, card: Card): Observable<Issue> {
+    updateCard(id: string, card: Issue): Observable<Issue> {
         return this.project$.pipe(
             take(1),
             switchMap(board => this._httpClient.put<Issue>('/api/issues/' + id, card).pipe(

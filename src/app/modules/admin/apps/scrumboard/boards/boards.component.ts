@@ -1,9 +1,12 @@
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
+import { CreateBoardComponent } from './create-board/create-board.comonent';
 import { Project } from './../kanban.model';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { DateTime } from 'luxon';
 import { Board } from 'app/modules/admin/apps/scrumboard/scrumboard.models';
 import { ScrumboardService } from 'app/modules/admin/apps/scrumboard/scrumboard.service';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
     selector: 'scrumboard-boards',
@@ -23,7 +26,8 @@ export class ScrumboardBoardsComponent implements OnInit, OnDestroy {
      */
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
-        private _scrumboardService: ScrumboardService
+        private _scrumboardService: ScrumboardService,
+        private _dialog: MatDialog,
     ) {
     }
 
@@ -50,8 +54,6 @@ export class ScrumboardBoardsComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((projects: Project[]) => {
                 this.projects = projects;
-                console.log(this.projects);
-
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
@@ -70,6 +72,11 @@ export class ScrumboardBoardsComponent implements OnInit, OnDestroy {
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
+    openCreateProjectDialog() {
+        this._dialog.open(CreateBoardComponent, {
+            width: '720px'
+        }).afterClosed().subscribe();
+    }
     /**
      * Format the given ISO_8601 date as a relative date
      *

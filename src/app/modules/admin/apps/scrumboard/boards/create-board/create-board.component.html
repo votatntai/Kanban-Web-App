@@ -1,0 +1,44 @@
+<div class="flex flex-col flex-auto -m-6">
+
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 shadow">
+        <div class="flex items-center gap-3">
+            <mat-icon class="text-blue-500" svgIcon="heroicons_outline:plus"></mat-icon>
+            <div class="font-semibold">Create New Board</div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex p-6">
+        <form class="flex flex-col gap-3 w-full" [formGroup]="projectForm">
+
+            <!-- Title -->
+            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full mb-3">
+                <mat-label>Title</mat-label>
+                <textarea matInput [formControlName]="'name'" [rows]="1" cdkTextareaAutosize [cdkAutosizeMinRows]="1">
+            </textarea>
+            </mat-form-field>
+
+            <!-- Description -->
+            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full mb-3">
+                <mat-label>Description</mat-label>
+                <textarea matInput [formControlName]="'description'" [rows]="3" cdkTextareaAutosize
+                    [placeholder]="'Add a description...'" [cdkAutosizeMinRows]="3">
+            </textarea>
+            </mat-form-field>
+
+            <span class="italic">You can change project details anytime in your project settings.</span>
+
+            <div class="flex justify-end">
+                <button (click)="createProject()" class="" mat-raised-button [color]="'primary'">
+                    <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+                    Create
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

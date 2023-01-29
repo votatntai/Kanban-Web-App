@@ -23,6 +23,7 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
     board: Board;
     project: Project;
     listTitleForm: UntypedFormGroup;
+    filterMode: 'Default' | 'Subtask' = 'Default';
 
     // Private
     private readonly _positionStep: number = 65536;
@@ -70,6 +71,7 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((project: Project) => {
                 this.project = { ...project };
+                console.log(this.project.statuses);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -115,6 +117,8 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
         // Create a new list model
         const list = new Status({
             projectId: this.project.id,
+            isFirst: false,
+            isLast: false,
             position: this.project.statuses.length ? this.project.statuses[this.project.statuses.length - 1].position + this._positionStep : this._positionStep,
             name: title
         });
@@ -166,11 +170,16 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
         //         }
         //     }
         // });
-
+        var list = this.project.statuses.find(list => list.id === id);
+        var hasItem = false;
+        if (list) {
+            hasItem = list.issues.length > 0;
+        }
         this._dialog.open(RemoveStatusDialogComponent, {
             data: {
                 id: id,
-                project: this.project
+                project: this.project,
+                hasItem: hasItem
             }
         }).afterClosed().subscribe(result => {
             if (result) {
@@ -190,6 +199,10 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
         // });
     }
 
+    filterSubTask(issues: Issue[], isChild: boolean) {
+        return issues.filter(issue => issue.isChild === isChild);
+    }
+
     /**
      * Add new card
      */
@@ -198,12 +211,30 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
         const card = new Issue({
             projectId: this.project.id,
             statusId: list.id,
+            isChild: false,
             position: list.issues.length ? list.issues[list.issues.length - 1].position + this._positionStep : this._positionStep,
-            name: title
+            name: title,
         });
 
         // Save the card
         this._scrumboardService.createCard(card).subscribe();
+    }
+
+    /**
+ * Add new sub card
+ */
+    addSubCard(list: Status, title: string): void {
+        // Create a new sub card model
+        const card = new Issue({
+            projectId: this.project.id,
+            statusId: list.id,
+            isChild: true,
+            position: list.issues.length ? list.issues[list.issues.length - 1].position + this._positionStep : this._positionStep,
+            name: title,
+        });
+
+        // Save the card
+        this._scrumboardService.createSubCard(card).subscribe();
     }
 
     /**
@@ -230,15 +261,22 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
     cardDropped(event: CdkDragDrop<Issue[]>): void {
         // Move or transfer the item
         if (event.previousContainer === event.container) {
+
             // Move the item
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
         }
         else {
-            // Transfer the item
-            transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
 
-            // Update the card's list it
-            event.container.data[event.currentIndex].statusId = event.container.id;
+            let status = this.project.statuses.find(status => status.id === event.container.id);
+
+            if (!status.limit || event.container.data.length < status.limit) {
+
+                // Transfer the item
+                transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+
+                // Update the card's list it
+                event.container.data[event.currentIndex].statusId = event.container.id;
+            }
         }
 
         // Calculate the positions

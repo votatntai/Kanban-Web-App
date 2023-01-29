@@ -1,10 +1,9 @@
-import { Issue, Label, Project } from './../../kanban.model';
+import { Issue, Label, Project, Status, Priority, Member } from './../../kanban.model';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatDialogRef } from '@angular/material/dialog';
 import { debounceTime, Subject, takeUntil, tap } from 'rxjs';
-import { assign } from 'lodash-es';
 import { DateTime } from 'luxon';
 import { ScrumboardService } from 'app/modules/admin/apps/scrumboard/scrumboard.service';
 
@@ -20,8 +19,12 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
     project: Project;
     issue: Issue;
     cardForm: UntypedFormGroup;
-    labels: Label[];
+    labels: Label[] = [];
+    priorities: Priority[] = [];
+    members: Member[] = [];
     filteredLabels: Label[];
+    isStatusChanged: boolean = false;
+    isDone: boolean = false;
 
     // Private
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -68,39 +71,52 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
         // Prepare the card form
         this.cardForm = this._formBuilder.group({
             id: [''],
-            title: ['', Validators.required],
+            name: ['', Validators.required],
             description: [''],
             labels: [[]],
+            estimateTime: [null, [Validators.min(0), Validators.max(8)]],
+            priorityId: [null],
+            statusId: [null],
+            assigneeId: [null],
             dueDate: [null]
         });
 
         // Fill the form
         this.cardForm.setValue({
             id: this.issue.id,
-            title: this.issue.name,
+            name: this.issue.name,
             description: this.issue.description,
             labels: this.issue.labels,
+            estimateTime: this.issue.estimateTime,
+            priorityId: this.issue.priorityId,
+            statusId: this.issue.statusId,
+            assigneeId: this.issue.assignee?.id || null,
             dueDate: this.issue.dueDate
         });
 
         // Update card when there is a value change on the card form
         this.cardForm.valueChanges
             .pipe(
-                tap((value) => {
-
-                    // Update the card object
-                    this.issue = assign(this.issue, value);
-                }),
-                debounceTime(300),
+                debounceTime(1000),
                 takeUntil(this._unsubscribeAll)
             )
             .subscribe((value) => {
+                if (this.cardForm.valid) {
+                    // Update the card on the server
+                    this._scrumboardService.updateCard(value.id, value).subscribe(result => {
+                        // Update the card position if status changed 
+                        if (this.isStatusChanged) {
+                            this._scrumboardService.getProject(this.project.id).subscribe(() => {
+                                this.isStatusChanged = false;
+                            });
+                        }
+                        // Update the card object
+                        this.issue = result;
+                        // Mark for check
+                        this._changeDetectorRef.markForCheck();
+                    });
+                }
 
-                // Update the card on the server
-                this._scrumboardService.updateCard(value.id, value).subscribe();
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
             });
     }
 
@@ -223,6 +239,31 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
      */
     isOverdue(date: string): boolean {
         return DateTime.fromISO(date).startOf('day') < DateTime.now().startOf('day');
+    }
+
+    /**
+ * Change issue status
+ */
+    statusChanged(event: any) {
+        this.isStatusChanged = true;
+        this.cardForm.controls['statusId'].setValue(event.value);
+    }
+
+    /**
+* Change issue assignee
+*/
+    assigneeChanged(event: any) {
+        if (event.value == 'null') {
+            event.value = null;
+        }
+        this.cardForm.controls['assigneeId'].setValue(event.value);
+    }
+
+    /**
+* Change issue priority
+*/
+    priorityChanged(event: any) {
+        this.cardForm.controls['priorityId'].setValue(event.value);
     }
 
     /**

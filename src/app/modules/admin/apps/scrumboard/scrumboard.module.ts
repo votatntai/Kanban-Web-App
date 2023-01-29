@@ -1,3 +1,4 @@
+import { CreateBoardComponent } from './boards/create-board/create-board.comonent';
 import { RemoveStatusDialogComponent } from './board/remove-status-dialog/remove-status-dialog.component';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
@@ -25,6 +26,7 @@ import { ScrumboardCardComponent } from 'app/modules/admin/apps/scrumboard/card/
 import { ScrumboardCardDetailsComponent } from 'app/modules/admin/apps/scrumboard/card/details/details.component';
 import { scrumboardRoutes } from 'app/modules/admin/apps/scrumboard/scrumboard.routing';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { DateAgoPipe } from '@fuse/pipes/time/time-ago.pipe';
 
 @NgModule({
     declarations: [
@@ -35,7 +37,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         ScrumboardBoardAddListComponent,
         ScrumboardCardComponent,
         ScrumboardCardDetailsComponent,
-        RemoveStatusDialogComponent
+        RemoveStatusDialogComponent,
+        CreateBoardComponent,
+        DateAgoPipe
     ],
     imports: [
         RouterModule.forChild(scrumboardRoutes),
@@ -54,7 +58,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         MatLuxonDateModule,
         MatMenuModule,
         MatProgressBarModule,
-        SharedModule
+        SharedModule,
     ],
     providers: [
         {

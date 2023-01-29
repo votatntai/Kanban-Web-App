@@ -7,7 +7,9 @@
             <div>Feature</div>
         </div>
         <div class="flex items-center gap-3">
-            <mat-icon class="text-green-500" svgIcon="heroicons_outline:check-circle"></mat-icon>
+            <ng-container *ngIf="issue.isClose">
+                <mat-icon class="text-green-500" svgIcon="heroicons_outline:check-circle"></mat-icon>
+            </ng-container>
             <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
                 <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x'"></mat-icon>
             </button>
@@ -18,12 +20,12 @@
     <form class="flex flex-col flex-0 items-start w-full p-6 sm:p-8 space-y-6 overflow-y-auto" [formGroup]="cardForm">
 
         <div class="grid grid-cols-3 gap-4 w-full">
-            <div class="col-span-2 max-h-200 px-3 overflow-y-scroll">
+            <div class="col-span-2 max-h-200 p-3 pt-0 overflow-y-scroll">
 
                 <!-- Title -->
                 <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full mb-3">
                     <mat-label>Title</mat-label>
-                    <textarea matInput [formControlName]="'title'" [rows]="1" cdkTextareaAutosize
+                    <textarea matInput [formControlName]="'name'" [rows]="1" cdkTextareaAutosize
                         [cdkAutosizeMinRows]="1">
             </textarea>
                 </mat-form-field>
@@ -149,8 +151,8 @@
                                     <div class="w-full">
                                         <!-- Comment -->
                                         <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
-                                            <textarea matInput [formControlName]="'title'" [rows]="1"
-                                                cdkTextareaAutosize [cdkAutosizeMinRows]="1"></textarea>
+                                            <textarea matInput [formControlName]="'name'" [rows]="1" cdkTextareaAutosize
+                                                [cdkAutosizeMinRows]="1"></textarea>
                                         </mat-form-field>
                                     </div>
                                 </div>
@@ -170,27 +172,47 @@
                 </div>
 
             </div>
-            <div class="col-span-1 max-h-200 px-3 overflow-y-scroll">
+            <div class="col-span-1 max-h-200 p-3 pt-0 overflow-y-scroll">
                 <mat-form-field class="w-full">
                     <mat-label>Status</mat-label>
-                    <mat-select>
-                        <mat-option [value]="'Haha'">
+                    <mat-select [(value)]="issue.statusId" (selectionChange)="statusChanged($event)">
+                        <mat-option *ngFor="let status  of project.statuses" [value]="status.id">
+                            {{ status.name }}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
 
+                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full mb-3">
+                    <mat-label>Estimate Time <span class="italic">(hour)</span></mat-label>
+                    <input matInput type="number" [formControlName]="'estimateTime'" />
+                </mat-form-field>
+
                 <mat-form-field class="w-full">
                     <mat-label>Assignee</mat-label>
-                    <mat-select>
-                        <mat-option [value]="'Haha'">
+                    <mat-select (selectionChange)="assigneeChanged($event)"
+                        [value]="issue.assignee ? issue.assignee.id : 'null'">
+                        <mat-option [value]="'null'">
+                            <mat-icon svgIcon="heroicons_outline:ban"></mat-icon>
+                            Unassigned
+                        </mat-option>
+                        <mat-option *ngFor="let member  of project.members" [value]="member.id">
+                            <mat-icon svgIcon="heroicons_outline:user-circle" [matTooltip]="member.email"></mat-icon>
+                            {{ member.name }}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
 
                 <mat-form-field class="w-full">
                     <mat-label>Priority</mat-label>
-                    <mat-select>
-                        <mat-option [value]="'Haha'">
+                    <mat-select [(value)]="issue.priorityId" (selectionChange)="priorityChanged($event)">
+                        <mat-option *ngFor="let priority  of project.priorities" [value]="priority.id">
+                            <mat-icon [svgIcon]="priority.name == 'Medium' ? 'heroicons_outline:menu' : '' ||
+                                priority.name == 'Low' ? 'heroicons_outline:chevron-down' : '' ||
+                                priority.name == 'Lowest' ? 'heroicons_outline:chevron-double-down' : '' ||
+                                priority.name == 'High' ? 'heroicons_outline:chevron-up' : '' ||
+                                priority.name == 'Highest' ? 'heroicons_outline:chevron-double-up' : ''">
+                            </mat-icon>
+                            {{ priority.name }}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
@@ -244,7 +266,7 @@
                             <ng-container *ngFor="let label of filteredLabels; trackBy: trackByFn">
                                 <mat-checkbox class="flex items-center h-10 min-h-10 px-4" [color]="'primary'"
                                     [checked]="hasLabel(label)" (change)="toggleProductTag(label, $event)">
-                                    {{label.title}}
+                                    {{label.name}}
                                 </mat-checkbox>
                             </ng-container>
                         </div>
@@ -253,21 +275,23 @@
 
                 <mat-form-field class="w-full">
                     <mat-label>Reporter</mat-label>
-                    <mat-select>
-                        <mat-option [value]="'Haha'">
+                    <mat-select [value]="issue.reporter?.id">
+                        <mat-option *ngFor="let member  of project.members" [value]="member.id">
+                            <mat-icon svgIcon="heroicons_outline:user-circle" [matTooltip]="member.email"></mat-icon>
+                            {{ member.name }}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
 
                 <div class="time-lapse">
                     <div>
-                        <span>Created </span><span>1 time</span>
+                        <span>Created </span><span>{{ issue.createAt | date:'dd/MM/YYYY' }}</span>
                     </div>
-                    <div>
-                        <span>Updated </span><span>1 time</span>
+                    <div *ngIf="issue.updateAt">
+                        <span>Updated </span><span>{{ issue.updateAt | dateAgo }}</span>
                     </div>
-                    <div>
-                        <span>Resolved </span><span>1 time</span>
+                    <div *ngIf="issue.resolveAt">
+                        <span>Resolved </span><span>{{ issue.resolveAt | dateAgo }}</span>
                     </div>
                 </div>
 
