@@ -1,3 +1,4 @@
+import { AddMemberComponent } from './add-member/add-member.component';
 import { RemoveStatusDialogComponent } from './remove-status-dialog/remove-status-dialog.component';
 import { DialogRef } from '@angular/cdk/dialog';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
@@ -71,7 +72,6 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((project: Project) => {
                 this.project = { ...project };
-                console.log(this.project.statuses);
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -159,7 +159,7 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
      *
      * @param id
      */
-    deleteList(id): void {
+    deleteList(status): void {
         // Open the confirmation dialog
         // const confirmation = this._fuseConfirmationService.open({
         //     title: 'Delete list',
@@ -170,20 +170,20 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
         //         }
         //     }
         // });
-        var list = this.project.statuses.find(list => list.id === id);
+        var list = this.project.statuses.find(list => list.id === status.id);
         var hasItem = false;
         if (list) {
             hasItem = list.issues.length > 0;
         }
         this._dialog.open(RemoveStatusDialogComponent, {
             data: {
-                id: id,
+                status: status,
                 project: this.project,
                 hasItem: hasItem
             }
         }).afterClosed().subscribe(result => {
             if (result) {
-                this._scrumboardService.deleteList(id, result.id).subscribe();
+                this._scrumboardService.deleteList(status.id, result.id).subscribe();
             }
         });
 
@@ -201,6 +201,15 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
 
     filterSubTask(issues: Issue[], isChild: boolean) {
         return issues.filter(issue => issue.isChild === isChild);
+    }
+
+    openAddMemberDialog() {
+        this._dialog.open(AddMemberComponent, {
+            width: '720px',
+            data: {
+                project: this.project
+            }
+        }).afterClosed().subscribe();
     }
 
     /**

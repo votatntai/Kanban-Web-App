@@ -14,7 +14,7 @@
             <mat-icon *ngFor="let member of project.members.slice(0, 3)" svgIcon="heroicons_outline:user-circle"
                 [matTooltip]="member.name"></mat-icon>
             <span *ngIf="project.members.length > 3" class="ml-3">...and more</span>
-            <button class="ml-3" mat-stroked-button>
+            <button class="ml-3" mat-stroked-button (click)="openAddMemberDialog()">
                 <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:plus'"></mat-icon>
                 Member
             </button>
@@ -79,7 +79,7 @@
                                                         Rename
                                                     </button>
                                                     <button *ngIf="project.statuses.length > 1" mat-menu-item
-                                                        (click)="deleteList(status.id)">
+                                                        (click)="deleteList(status)">
                                                         <mat-icon class="icon-size-5"
                                                             [svgIcon]="'heroicons_solid:trash'"></mat-icon>
                                                         Delete
@@ -130,10 +130,23 @@
                                                                     </div>
                                                                 </div>
                                                             </ng-container>
+
+                                                            <!-- Assignee -->
+                                                            <ng-container *ngIf="issue.assignee">
+                                                                <div
+                                                                    class="flex items-center rounded text-sm text-blue-500 font-medium leading-5">
+                                                                    <mat-icon class="icon-size-4 text-current"
+                                                                        [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                                                                    <div class="ml-1">
+                                                                        {{ issue.assignee.name }}
+                                                                    </div>
+                                                                </div>
+                                                            </ng-container>
+
                                                             <!-- Due date -->
                                                             <ng-container *ngIf="issue.dueDate">
                                                                 <div class="flex items-center rounded text-sm font-medium leading-5 text-secondary"
-                                                                    [ngClass]="{'text-red-600': isOverdue(issue.dueDate)}">
+                                                                    [ngClass]="{'text-red-600': isOverdue(issue.dueDate) && !issue.isClose}">
                                                                     <mat-icon class="icon-size-4 text-current"
                                                                         [svgIcon]="'heroicons_outline:clock'"></mat-icon>
                                                                     <div class="ml-1">
@@ -149,10 +162,6 @@
                                         </div>
                                     </div>
                                 </ng-container>
-
-                                <!-- New list -->
-                                <scrumboard-board-add-list (saved)="addList($event)" [buttonTitle]="'Add a column'">
-                                </scrumboard-board-add-list>
 
                             </div>
 

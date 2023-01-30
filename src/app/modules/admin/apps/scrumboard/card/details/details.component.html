@@ -10,6 +10,9 @@
             <ng-container *ngIf="issue.isClose">
                 <mat-icon class="text-green-500" svgIcon="heroicons_outline:check-circle"></mat-icon>
             </ng-container>
+            <button mat-icon-button (click)="removeIssue()">
+                <mat-icon class="text-red-500" [svgIcon]="'mat_outline:delete_outline'"></mat-icon>
+            </button>
             <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
                 <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x'"></mat-icon>
             </button>
@@ -247,28 +250,57 @@
                     </div>
                 </div>
 
-                <!-- Labels -->
-                <div class="w-full mb-3">
-                    <div class="font-medium">Labels</div>
-                    <div class="mt-1 rounded-md border border-gray-300 shadow-sm overflow-hidden">
+                <!-- Tags -->
+                <div class="mb-3">
+                    <span class="mb-px font-medium leading-tight">Labels</span>
+                    <div
+                        class="mt-1.5 rounded-md border border-gray-300 dark:border-gray-500 shadow-sm overflow-hidden">
                         <!-- Header -->
-                        <div class="flex items-center my-2 mx-3">
+                        <div class="flex items-center -my-px py-2 px-3">
                             <div class="flex items-center flex-auto min-w-0">
                                 <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:search'"></mat-icon>
                                 <input class="min-w-0 ml-2 py-1 border-0" type="text" placeholder="Enter label name"
-                                    (input)="filterLabels($event)" (keydown)="filterLabelsInputKeyDown($event)"
-                                    [maxLength]="50">
+                                    (input)="filterTags($event)" (keydown)="filterTagsInputKeyDown($event)"
+                                    [maxLength]="50" #newTagInput>
                             </div>
+                            <button class="ml-3 w-8 h-8 min-h-8" mat-icon-button (click)="toggleTagsEditMode()">
+                                <mat-icon *ngIf="!tagsEditMode" class="icon-size-5"
+                                    [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                                <mat-icon *ngIf="tagsEditMode" class="icon-size-5"
+                                    [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                            </button>
                         </div>
-                        <!-- Available labels -->
-                        <div class="max-h-40 leading-none overflow-y-auto border-t">
-                            <!-- Labels -->
-                            <ng-container *ngFor="let label of filteredLabels; trackBy: trackByFn">
-                                <mat-checkbox class="flex items-center h-10 min-h-10 px-4" [color]="'primary'"
-                                    [checked]="hasLabel(label)" (change)="toggleProductTag(label, $event)">
-                                    {{label.name}}
-                                </mat-checkbox>
+                        <!-- Available tags -->
+                        <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                            <!-- Tags -->
+                            <ng-container *ngIf="!tagsEditMode">
+                                <ng-container *ngFor="let tag of filteredTags; trackBy: trackByFn">
+                                    <mat-checkbox class="flex items-center h-10 min-h-10 px-4" [color]="'primary'"
+                                        [checked]="isTagChecked(tag)" (change)="toggleProductTag(tag, $event)">
+                                        {{tag.name}}
+                                    </mat-checkbox>
+                                </ng-container>
                             </ng-container>
+                            <!-- Tags editing -->
+                            <ng-container *ngIf="tagsEditMode">
+                                <div class="p-4 space-y-2">
+                                    <ng-container *ngFor="let tag of filteredTags; trackBy: trackByFn">
+                                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full">
+                                            <input matInput [value]="tag.name" (input)="updateTagTitle(tag, $event)">
+                                            <button mat-icon-button (click)="deleteTag(tag)" matSuffix>
+                                                <mat-icon class="icon-size-5"
+                                                    [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                            </button>
+                                        </mat-form-field>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                            <div class="flex items-center h-10 min-h-10 -ml-0.5 pl-4 pr-3 leading-none cursor-pointer border-t hover:bg-gray-50 dark:hover:bg-hover"
+                                *ngIf="shouldShowCreateTagButton(newTagInput.value)"
+                                (click)="createTag(newTagInput.value); newTagInput.value = ''" matRipple>
+                                <mat-icon class="mr-2 icon-size-5" [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                <div class="break-all">Create "<b>{{newTagInput.value}}</b>"</div>
+                            </div>
                         </div>
                     </div>
                 </div>

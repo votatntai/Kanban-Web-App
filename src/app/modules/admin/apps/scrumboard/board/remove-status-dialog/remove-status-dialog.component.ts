@@ -37,8 +37,8 @@ export class RemoveStatusDialogComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        this.statuses = this.data.project.statuses.filter(status => status.id !== this.data.id);
-        this.selectedRemoveStatus = this.data.project.statuses.filter(status => status.id === this.data.id)[0];
+        this.statuses = this.data.project.statuses.filter(status => status.id !== this.data.status.id);
+        this.selectedRemoveStatus = this.data.project.statuses.filter(status => status.id === this.data.status.id)[0];
         this.selectedInheritanceStatus = this.statuses[0];
         this.removeStatusForm = this._formBuilder.group({
             removeStatus: [this.selectedRemoveStatus.name],

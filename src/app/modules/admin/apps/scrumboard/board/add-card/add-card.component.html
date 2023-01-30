@@ -13,12 +13,11 @@
                     #titleAutosize="cdkTextareaAutosize">
                 </textarea>
             </div>
-            <div class="flex items-center mt-2">
+            <div [ngClass]="!formVisible ? 'hidden' : ''" class="flex items-center mt-2">
                 <button class="h-8 min-h-8" mat-flat-button [color]="'primary'" [type]="'button'" (click)="save()">
                     Add issue
                 </button>
-                <button [ngClass]="{'hidden': !formVisible}" class="ml-1 w-8 h-8 min-h-8" mat-icon-button
-                    [type]="'button'" (click)="toggleFormVisibility()">
+                <button class="ml-1 w-8 h-8 min-h-8" mat-icon-button [type]="'button'" (click)="toggleFormVisibility()">
                     <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:x'"></mat-icon>
                 </button>
             </div>

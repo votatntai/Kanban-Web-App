@@ -1,0 +1,94 @@
+<div class="relative flex flex-col w-full h-full">
+
+    <!-- Dismiss button -->
+    <ng-container>
+        <div class="absolute top-0 right-0">
+            <button mat-icon-button [matDialogClose]="undefined">
+                <mat-icon class="text-secondary" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+            </button>
+        </div>
+    </ng-container>
+
+    <!-- Content -->
+    <div class="flex flex-col sm:flex-row flex-auto items-center sm:items-start p-8 pb-6 sm:pb-8">
+
+        <ng-container>
+            <div
+                class="flex flex-col items-center sm:items-start mt-4 sm:mt-0 sm:pr-8 space-y-1 text-center sm:text-left">
+
+                <!-- Title -->
+                <ng-container>
+                    <div class="text-xl leading-6 font-medium">
+                        Add member
+                    </div>
+                </ng-container>
+
+                <!-- Message -->
+                <ng-container>
+                    <div class="text-secondary">
+                        Enter your email or username to search and add members to the project!
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
+
+    </div>
+
+    <ng-container>
+
+        <div class="px-8">
+            <form [formGroup]="searchUserForm">
+                <mat-form-field class="w-full">
+                    <mat-label>Search</mat-label>
+                    <input type="text" matInput [formControlName]="'search'">
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div class="px-8 h-60 overflow-y-scroll">
+
+            <ng-container *ngIf="users.length === 0">
+                <div class="font-medium italic">
+                    Can't find any users
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="users.length > 0">
+                <ng-container *ngFor="let user of users">
+
+                    <div class="flex items-center justify-between bg-slate-50 w-full px-6 py-3 shadow-md rounded mt-3">
+                        <div class="flex gap-3 items-center">
+                            <mat-icon svgIcon="heroicons_outline:user"></mat-icon>
+                            <div class="font-medium">
+                                {{ user.name }}
+                            </div>
+                            <div class="italic">
+                                {{ user.email }}
+                            </div>
+                        </div>
+                        <div class="flex cursor-pointer items-center" (click)="inviteMember(user.id)">
+                            <mat-icon class="text-blue-500" svgIcon="heroicons_outline:user-add"></mat-icon>
+                        </div>
+                    </div>
+
+                </ng-container>
+            </ng-container>
+
+        </div>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container>
+        <div class="flex items-center justify-center sm:justify-end px-6 py-4 space-x-3">
+
+            <!-- Cancel -->
+            <ng-container>
+                <button mat-stroked-button [matDialogClose]="'cancelled'">
+                    Cancel
+                </button>
+            </ng-container>
+
+        </div>
+    </ng-container>
+
+</div>

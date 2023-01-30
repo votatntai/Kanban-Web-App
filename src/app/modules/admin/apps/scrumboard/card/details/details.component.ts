@@ -1,11 +1,12 @@
-import { Issue, Label, Project, Status, Priority, Member } from './../../kanban.model';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatDialogRef } from '@angular/material/dialog';
-import { debounceTime, Subject, takeUntil, tap } from 'rxjs';
-import { DateTime } from 'luxon';
+import { FuseConfirmationService } from '@fuse/services/confirmation/confirmation.service';
 import { ScrumboardService } from 'app/modules/admin/apps/scrumboard/scrumboard.service';
+import { DateTime } from 'luxon';
+import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
+import { Issue, Label, Member, Priority, Project } from './../../kanban.model';
 
 @Component({
     selector: 'scrumboard-card-details',
@@ -19,12 +20,13 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
     project: Project;
     issue: Issue;
     cardForm: UntypedFormGroup;
-    labels: Label[] = [];
     priorities: Priority[] = [];
     members: Member[] = [];
-    filteredLabels: Label[];
     isStatusChanged: boolean = false;
     isDone: boolean = false;
+    filteredTags: Label[];
+    tags: Label[];
+    tagsEditMode: boolean = false;
 
     // Private
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -36,6 +38,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
         public matDialogRef: MatDialogRef<ScrumboardCardDetailsComponent>,
         private _changeDetectorRef: ChangeDetectorRef,
         private _formBuilder: UntypedFormBuilder,
+        private _fuseConfirmationService: FuseConfirmationService,
         private _scrumboardService: ScrumboardService
     ) {
     }
@@ -58,7 +61,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
                 this.project = board;
 
                 // Get the labels
-                this.labels = this.filteredLabels = board.labels;
+                this.tags = this.filteredTags = board.labels;
             });
 
         // Get the card details
@@ -93,6 +96,9 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             assigneeId: this.issue.assignee?.id || null,
             dueDate: this.issue.dueDate
         });
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
 
         // Update card when there is a value change on the card form
         this.cardForm.valueChanges
@@ -134,57 +140,173 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
     // -----------------------------------------------------------------------------------------------------
 
     /**
+     * Toggle the tags edit mode
+     */
+    toggleTagsEditMode(): void {
+        this.tagsEditMode = !this.tagsEditMode;
+    }
+
+    /**
+ * Filter tags
+ *
+ * @param event
+ */
+    filterTags(event): void {
+        // Get the value
+        const value = event.target.value.toLowerCase();
+
+        // Filter the tags
+        this.filteredTags = this.tags.filter(tag => tag.name.toLowerCase().includes(value));
+    }
+
+    isTagChecked(tag: Label): boolean {
+        return this.issue.labels.some(label => label.id === tag.id);
+    }
+
+    /**
+ * Filter tags input key down event
+ *
+ * @param event
+ */
+    filterTagsInputKeyDown(event): void {
+        // Return if the pressed key is not 'Enter'
+        if (event.key !== 'Enter') {
+            return;
+        }
+
+        // If there is no tag available...
+        if (this.filteredTags.length === 0) {
+            // Create the tag
+            this.createTag(event.target.value);
+
+            // Clear the input
+            event.target.value = '';
+
+            // Return
+            return;
+        }
+
+        // If there is a tag...
+        const tag = this.filteredTags[0];
+        const isTagApplied = this.issue.labels.find(label => label.id === tag.id);
+
+        // If the found tag is already applied to the product...
+        if (isTagApplied) {
+            // Remove the tag from the product
+            this.removeTagFromProduct(tag);
+        }
+        else {
+            // Otherwise add the tag to the product
+            this.addTagToProduct(tag);
+        }
+    }
+
+    /**
+     * Create a new tag
+     *
+     * @param title
+     */
+    createTag(title: string): void {
+        const tag: Label = {
+            id: null,
+            name: title,
+            projectId: this.project.id
+        };
+
+        // Create tag on the server
+        this._scrumboardService.createLabel(tag)
+            .subscribe((response) => {
+
+                // Add the tag to the product
+                this.addTagToProduct(response);
+            });
+    }
+
+    /**
+     * Update the tag title
+     *
+     * @param tag
+     * @param event
+     */
+    updateTagTitle(tag: Label, event): void {
+        fromEvent(event.target, 'input').pipe(debounceTime(1000)).subscribe(() => {
+
+            // Update the title on the tag
+            tag.name = event.target.value;
+
+            // Update the tag on the server
+            this._scrumboardService.updateLabel(tag.id, tag).subscribe(() => {
+
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
+        })
+
+    }
+
+    /**
+     * Delete the tag
+     *
+     * @param tag
+     */
+    deleteTag(tag: Label): void {
+        // Delete the tag from the server
+        this._scrumboardService.deleteLabel(tag.id).subscribe(() => {
+
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+    }
+
+    /**
+     * Add tag to the product
+     *
+     * @param tag
+     */
+    addTagToProduct(tag: Label): void {
+        // Add the tag
+        this.issue.labels.unshift(tag);
+
+        // Update the selected product form
+        this.cardForm.get('labels').patchValue(this.issue.labels);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    /**
+     * Remove tag from the product
+     *
+     * @param tag
+     */
+    removeTagFromProduct(tag: Label): void {
+        // Remove the tag
+        this.issue.labels.splice(this.issue.labels.findIndex(item => item.id === tag.id), 1);
+
+        // Update the selected product form
+        this.cardForm.get('tags').patchValue(this.issue.labels);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+
+    /**
+     * Should the create tag button be visible
+     *
+     * @param inputValue
+     */
+    shouldShowCreateTagButton(inputValue: string): boolean {
+        return !!!(inputValue === '' || this.tags.findIndex(tag => tag.name.toLowerCase() === inputValue.toLowerCase()) > -1);
+    }
+
+    /**
      * Return whether the card has the given label
      *
      * @param label
      */
     hasLabel(label: Label): boolean {
         return !!this.issue.labels.find(cardLabel => cardLabel.id === label.id);
-    }
-
-    /**
-     * Filter labels
-     *
-     * @param event
-     */
-    filterLabels(event): void {
-        // Get the value
-        const value = event.target.value.toLowerCase();
-
-        // Filter the labels
-        this.filteredLabels = this.labels.filter(label => label.name.toLowerCase().includes(value));
-    }
-
-    /**
-     * Filter labels input key down event
-     *
-     * @param event
-     */
-    filterLabelsInputKeyDown(event): void {
-        // Return if the pressed key is not 'Enter'
-        if (event.key !== 'Enter') {
-            return;
-        }
-
-        // If there is no label available...
-        if (this.filteredLabels.length === 0) {
-            // Return
-            return;
-        }
-
-        // If there is a label...
-        const label = this.filteredLabels[0];
-        const isLabelApplied = this.issue.labels.find(cardLabel => cardLabel.id === label.id);
-
-        // If the found label is already applied to the card...
-        if (isLabelApplied) {
-            // Remove the label from the card
-            this.removeLabelFromCard(label);
-        }
-        else {
-            // Otherwise add the label to the card
-            this.addLabelToCard(label);
-        }
     }
 
     /**
@@ -264,6 +386,23 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
 */
     priorityChanged(event: any) {
         this.cardForm.controls['priorityId'].setValue(event.value);
+    }
+
+    removeIssue() {
+        var config = {
+            title: `Remove "` + this.issue.name + `"`,
+            message: `You're about to permanently delete this issue, its comments and attachments, and all of its data. 
+            If you're not sure, you can resolve or close this issue instead.`
+        }
+        this._fuseConfirmationService.open(config).afterClosed().subscribe(result => {
+            if (result === 'confirmed') {
+                this._scrumboardService.deleteCard(this.issue.id).subscribe(result => {
+                    if (result) {
+                        this.matDialogRef.close();
+                    }
+                })
+            }
+        })
     }
 
     /**

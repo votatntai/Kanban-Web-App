@@ -1,3 +1,4 @@
+import { AddMemberComponent } from './board/add-member/add-member.component';
 import { CreateBoardComponent } from './boards/create-board/create-board.comonent';
 import { RemoveStatusDialogComponent } from './board/remove-status-dialog/remove-status-dialog.component';
 import { NgModule } from '@angular/core';
@@ -39,6 +40,7 @@ import { DateAgoPipe } from '@fuse/pipes/time/time-ago.pipe';
         ScrumboardCardDetailsComponent,
         RemoveStatusDialogComponent,
         CreateBoardComponent,
+        AddMemberComponent,
         DateAgoPipe
     ],
     imports: [
