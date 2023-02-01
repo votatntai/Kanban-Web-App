@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation/confirmation.service';
 import { ScrumboardService } from 'app/modules/admin/apps/scrumboard/scrumboard.service';
 import { DateTime } from 'luxon';
 import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
-import { Issue, Label, Member, Priority, Project } from './../../kanban.model';
+import { Issue, Label, LogWork, Member, Priority, Project } from './../../kanban.model';
+import { LogWorkComponent } from './log-work/log-work.component';
 
 @Component({
     selector: 'scrumboard-card-details',
@@ -17,6 +19,7 @@ import { Issue, Label, Member, Priority, Project } from './../../kanban.model';
 })
 export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
     @ViewChild('labelInput') labelInput: ElementRef<HTMLInputElement>;
+    user: any;
     project: Project;
     issue: Issue;
     cardForm: UntypedFormGroup;
@@ -27,6 +30,14 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
     filteredTags: Label[];
     tags: Label[];
     tagsEditMode: boolean = false;
+    commentForm: UntypedFormGroup;
+    webLinkToggle: boolean = false;
+    weblinkForm: UntypedFormGroup;
+    urlPattern: string = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
+    spentTime: number = null;
+    remainingTime: number = 0;
+    calculateTime: string = '0';
+    timeRemaining: string = '0';
 
     // Private
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -38,6 +49,8 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
         public matDialogRef: MatDialogRef<ScrumboardCardDetailsComponent>,
         private _changeDetectorRef: ChangeDetectorRef,
         private _formBuilder: UntypedFormBuilder,
+        private _dialog: MatDialog,
+        private _router: Router,
         private _fuseConfirmationService: FuseConfirmationService,
         private _scrumboardService: ScrumboardService
     ) {
@@ -51,6 +64,9 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
+
+        //Get user from local storage
+        this.user = JSON.parse(localStorage.getItem('user'));
 
         // Get the project
         this._scrumboardService.project$
@@ -69,6 +85,8 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((card) => {
                 this.issue = card;
+                console.log(card);
+                this.calculateTimeTracking();
             });
 
         // Prepare the card form
@@ -77,12 +95,27 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             name: ['', Validators.required],
             description: [''],
             labels: [[]],
-            estimateTime: [null, [Validators.min(0), Validators.max(8)]],
+            estimateTime: [null, [Validators.min(0), Validators.max(72)]],
             priorityId: [null],
             statusId: [null],
             assigneeId: [null],
             dueDate: [null]
         });
+
+        // Prepare the comment form
+        this.commentForm = this._formBuilder.group({
+            userId: [this.user.id, Validators.required],
+            issueId: [this.issue.id, Validators.required],
+            content: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(256)]]
+        });
+
+        // Prepare the web link form
+        this.weblinkForm = this._formBuilder.group({
+            url: ['', [Validators.required, Validators.pattern(this.urlPattern)]],
+            issueId: [this.issue.id, Validators.required],
+            description: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(256)]]
+        });
+
 
         // Fill the form
         this.cardForm.setValue({
@@ -124,6 +157,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
                 }
 
             });
+
     }
 
     /**
@@ -144,6 +178,10 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
      */
     toggleTagsEditMode(): void {
         this.tagsEditMode = !this.tagsEditMode;
+    }
+
+    toggleWebLinkCreateMode() {
+        this.webLinkToggle = !this.webLinkToggle;
     }
 
     /**
@@ -220,6 +258,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
                 // Add the tag to the product
                 this.addTagToProduct(response);
             });
+
     }
 
     /**
@@ -403,6 +442,116 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
                 })
             }
         })
+    }
+
+    postComment() {
+        if (this.commentForm.valid) {
+            this._scrumboardService.postComment(this.commentForm.value).subscribe(result => {
+                if (result) {
+                    this.commentForm.reset();
+                }
+                this._changeDetectorRef.markForCheck();
+            })
+        }
+    }
+
+    deleteComment(id: string) {
+        this._fuseConfirmationService.open().afterClosed().subscribe(result => {
+            if (result === 'confirmed') {
+                this._scrumboardService.deleteComment(id).subscribe(() => {
+                    this._changeDetectorRef.markForCheck();
+                })
+            }
+        })
+    }
+
+    createWebLink() {
+        if (this.weblinkForm.valid) {
+            this._scrumboardService.createWebLink(this.weblinkForm.value).subscribe(result => {
+                if (result) {
+                    this.weblinkForm.reset();
+                    this.weblinkForm.controls['issueId'].setValue(this.issue.id);
+                    this.webLinkToggle = false;
+                }
+                this._changeDetectorRef.markForCheck();
+            })
+        }
+    }
+
+    deleteWebLink(id: string) {
+        this._fuseConfirmationService.open().afterClosed().subscribe(result => {
+            if (result === 'confirmed') {
+                this._scrumboardService.deleteWebLink(id).subscribe(() => {
+                    this._changeDetectorRef.markForCheck();
+                })
+            }
+        })
+    }
+
+    openLogWorkDialog(logWork?: LogWork) {
+        this._dialog.open(LogWorkComponent, {
+            width: '480px',
+            data: {
+                issue: this.issue,
+                logWork: logWork
+            }
+        })
+    }
+
+    deleteLogWork(id: string) {
+        this._fuseConfirmationService.open().afterClosed().subscribe(result => {
+            if (result === 'confirmed') {
+                this._scrumboardService.deleteLogWork(id).subscribe(() => {
+                    this._changeDetectorRef.markForCheck();
+                })
+            }
+        })
+    }
+
+    calculateTimeTracking() {
+        var totalTime = this.issue.estimateTime;
+        var spentTime = 0;
+
+        // Calculate total spent time of issue log work
+        this.issue.logWorks.forEach(logWork => {
+            spentTime += logWork.spentTime;
+        });
+        this.spentTime = spentTime;
+
+        if (totalTime) {
+
+            // Calculate ratio when spent time less than estimate time
+            if (spentTime <= totalTime) {
+                let ratio = spentTime / totalTime * 100;
+                ratio < 0 ? ratio = 0 : ratio > 100 ? ratio = 100 : 0;
+                this.calculateTime = ratio + '%';
+            }
+
+            // Calculate ratio when spent time more than estimate time
+            else {
+                let ratio = totalTime / spentTime * 100;
+                this.calculateTime = ratio + '%';
+            }
+
+        } else if (spentTime > 0) {
+            this.calculateTime = '100%';
+        } else {
+            this.calculateTime = '0';
+        }
+
+        // Calculate remaining time
+        let remaining = 0;
+        spentTime <= totalTime ? remaining = totalTime - spentTime : remaining = 0;
+        this.remainingTime = remaining;
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    redirectToChild(child: any) {
+        console.log(child);
+        this.matDialogRef.close();
+        this._router.navigate(['boards/' + child.projectId + '/card/', child.id]);
     }
 
     /**

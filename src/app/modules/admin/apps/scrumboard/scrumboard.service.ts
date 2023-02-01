@@ -1,4 +1,4 @@
-import { Issue, Label, Member, Project, Status } from './kanban.model';
+import { Comment, Issue, Label, Member, Project, Status, Link, LogWork } from './kanban.model';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
@@ -660,6 +660,168 @@ export class ScrumboardService {
 
                     // Update the board
                     this._project.next(board);
+
+                    // Return the deleted status
+                    return isDeleted;
+                })
+            ))
+        );
+    }
+
+    // Post comment
+    postComment(comment) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.post<Comment>('/api/comments', comment).pipe(
+                map((newComment) => {
+
+                    // Update the board labels with the new label
+                    board.comments = [...board.comments, newComment];
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return new label from observable
+                    return newComment;
+                })
+            ))
+        );
+    }
+
+    // Delete comment
+    deleteComment(id: string) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.delete('/api/comments/' + id).pipe(
+                map((isDeleted: boolean) => {
+
+                    // Find the index of the deleted label
+                    const index = board.comments.findIndex(item => item.id === id);
+
+                    // Delete the label
+                    board.comments.splice(index, 1);
+
+                    // If the label is deleted...
+                    if (isDeleted) {
+                        // Remove the label from any card that uses it
+                        board.comments.forEach((comment) => {
+                            const labelIndex = board.comments.findIndex(label => label.id === id);
+                            if (labelIndex > -1) {
+                                board.comments.splice(labelIndex, 1);
+                            }
+                        });
+                    }
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return the deleted status
+                    return isDeleted;
+                })
+            ))
+        );
+    }
+
+    // Create web link
+    createWebLink(data) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.post<Link>('/api/links', data).pipe(
+                map((newWebLink) => {
+
+                    // Update the board labels with the new label
+                    board.links = [...board.links, newWebLink];
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return new label from observable
+                    return newWebLink;
+                })
+            ))
+        );
+    }
+
+    // Create web link
+    createLogWork(data) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.post<LogWork>('/api/log-works', data).pipe(
+                map((newLogWork) => {
+
+                    // Update the board labels with the new label
+                    board.logWorks = [...board.logWorks, newLogWork];
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return new label from observable
+                    return newLogWork;
+                })
+            ))
+        );
+    }
+
+    // Delete web link
+    deleteWebLink(id: string) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.delete('/api/links/' + id).pipe(
+                map((isDeleted: boolean) => {
+
+                    // Find the index of the deleted label
+                    const index = board.links.findIndex(item => item.id === id);
+
+                    // Delete the label
+                    board.links.splice(index, 1);
+
+                    // If the label is deleted...
+                    if (isDeleted) {
+                        // Remove the label from any card that uses it
+                        board.links.forEach((comment) => {
+                            const labelIndex = board.links.findIndex(label => label.id === id);
+                            if (labelIndex > -1) {
+                                board.links.splice(labelIndex, 1);
+                            }
+                        });
+                    }
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return the deleted status
+                    return isDeleted;
+                })
+            ))
+        );
+    }
+
+    // Delete log work
+    deleteLogWork(id: string) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.delete('/api/log-works/' + id).pipe(
+                map((isDeleted: boolean) => {
+
+                    // Find the index of the deleted label
+                    const index = board.logWorks.findIndex(item => item.id === id);
+
+                    // Delete the label
+                    board.logWorks.splice(index, 1);
+
+                    // If the label is deleted...
+                    if (isDeleted) {
+                        // Remove the label from any card that uses it
+                        board.logWorks.forEach((comment) => {
+                            const labelIndex = board.logWorks.findIndex(label => label.id === id);
+                            if (labelIndex > -1) {
+                                board.logWorks.splice(labelIndex, 1);
+                            }
+                        });
+                    }
+
+                    // Update the board
+                    this._issue.next(board);
 
                     // Return the deleted status
                     return isDeleted;

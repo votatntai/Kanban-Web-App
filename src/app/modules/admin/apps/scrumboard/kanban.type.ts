@@ -29,13 +29,16 @@ export interface IIssue {
     isChild: boolean;
     description?: string | null;
     labels?: ILabel[];
+    comments?: IComment[];
+    links?: ILink[];
+    logWorks?: ILogWork[];
     dueDate?: string | null;
     priorityId?: string | null;
     assignee?: IMember | null;
     reporter?: IMember | null;
-    childIssues?: IIssue[];
-    estimateTime?: string | null;
-    typeId?: string | null;
+    childIssues?: any[];
+    estimateTime?: number | null;
+    type?: any | null;
     createAt?: string | null;
     updateAt?: string | null;
     resolveAt?: string | null;
@@ -60,3 +63,29 @@ export interface IPriority {
     projectId: string;
     name: string;
 }
+
+export interface IComment {
+    id: string | null;
+    user: any;
+    issueId: string;
+    content: string;
+    createAt: string;
+}
+
+export interface ILink {
+    id: string | null;
+    issueId: string;
+    url: string;
+    description: string;
+}
+
+export interface ILogWork {
+    id: string | null;
+    issueId: string;
+    user: any;
+    spentTime: number;
+    remainingTime: number;
+    description: string;
+    createAt: string;
+}
+

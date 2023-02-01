@@ -1,3 +1,4 @@
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { debounceTime } from 'rxjs';
 import { Component, Inject, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
@@ -20,6 +21,7 @@ export class AddMemberComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) public data: any,
         public dialogRef: MatDialogRef<AddMemberComponent>,
         private _formBuilder: UntypedFormBuilder,
+        private _fuseConfirmationService: FuseConfirmationService,
         private _scrumboardService: ScrumboardService
     ) { }
 
@@ -46,8 +48,12 @@ export class AddMemberComponent implements OnInit {
     }
 
     inviteMember(userId: string) {
-        this._scrumboardService.inviteMember(this.data.project.id, userId).subscribe(() => {
-            this.users = this.checkIfMemberAlreadyInProject(this.users);
+        this._fuseConfirmationService.open().afterClosed().subscribe(result => {
+            if (result === 'confirmed') {
+                this._scrumboardService.inviteMember(this.data.project.id, userId).subscribe(() => {
+                    this.users = this.checkIfMemberAlreadyInProject(this.users);
+                })
+            }
         })
     }
 

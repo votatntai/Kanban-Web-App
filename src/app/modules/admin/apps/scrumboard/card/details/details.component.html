@@ -4,7 +4,7 @@
     <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 shadow">
         <div class="flex items-center gap-3">
             <mat-icon class="text-blue-500" svgIcon="heroicons_outline:bookmark"></mat-icon>
-            <div>Feature</div>
+            <div>{{ issue.type.name }}</div>
         </div>
         <div class="flex items-center gap-3">
             <ng-container *ngIf="issue.isClose">
@@ -53,7 +53,7 @@
                         Child Issue
                     </button>
 
-                    <button class="" mat-stroked-button>
+                    <button class="" mat-stroked-button (click)="toggleWebLinkCreateMode()">
                         <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:link'"></mat-icon>
                         Web link
                     </button>
@@ -107,37 +107,84 @@
                 <div class="child-issues mb-3">
                     <div class="font-medium">Child issues</div>
 
-                    <div class="flex justify-between w-full p-4 shadow rounded-sm cursor-pointer">
-                        <div class="flex gap-4 items-center">
-                            <mat-icon svgIcon="heroicons_outline:bookmark"></mat-icon>
-                            <span class="truncate">Issue for test</span>
-                        </div>
-                        <div class="flex gap-4 items-center">
-                            <mat-icon svgIcon="mat_outline:menu"></mat-icon>
-                            <div class="flex gap-2">
-                                <mat-icon svgIcon="heroicons_outline:user-circle"></mat-icon>
-                                <span>Janglee</span>
+                    <ng-container *ngIf="issue.childIssues && issue.childIssues.length > 0">
+                        <ng-container *ngFor="let child of issue.childIssues">
+                            <div class="flex justify-between w-full p-4 shadow rounded-sm cursor-pointer mb-3">
+                                <div class="flex gap-4 items-center">
+                                    <mat-icon class="text-blue-500" svgIcon="heroicons_outline:bookmark"></mat-icon>
+                                    <span class="truncate">{{ child.name }}</span>
+                                </div>
+                                <div class="flex gap-4 items-center">
+                                    <mat-icon svgIcon="mat_outline:menu"></mat-icon>
+                                    <div class="flex gap-2">
+                                        <mat-icon svgIcon="heroicons_outline:user-circle"></mat-icon>
+                                        <div *ngIf="!child.assignee">
+                                            <span>Unassigned</span>
+                                        </div>
+                                        <div *ngIf="child.assignee">
+                                            <span>{{ child.assignee.name }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center bg-blue-500 rounded-lg shadow p-2">
+                                        <span class="text-white text-sm">{{ child.status.name }}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center bg-green-500 rounded-lg shadow px-2">
-                                <span class="text-white text-sm">Done</span>
-                            </div>
-                        </div>
-                    </div>
-
+                        </ng-container>
+                    </ng-container>
                 </div>
 
                 <div class="web-links mb-3">
-                    <div class="font-medium">Web links</div>
 
-                    <div class="flex justify-between w-full p-4 shadow rounded-sm cursor-pointer">
-                        <div class="flex gap-4 items-center">
-                            <mat-icon svgIcon="heroicons_outline:external-link"></mat-icon>
-                            <span class="truncate">Some description for this link</span>
+                    <ng-container *ngIf="issue.links && issue.links.length > 0">
+                        <div class="font-medium">Web links</div>
+                        <ng-container *ngFor="let link of issue.links">
+                            <div
+                                class="flex justify-between items-center w-full px-4 py-2 shadow rounded-sm cursor-pointer mb-3">
+                                <a [href]="link.url" class="w-full" target="_blank">
+                                    <div class="flex gap-4 items-center w-full">
+                                        <mat-icon svgIcon="heroicons_outline:external-link"></mat-icon>
+                                        <span class="truncate w-full">{{ link.description }}</span>
+                                    </div>
+                                </a>
+                                <button mat-icon-button (click)="deleteWebLink(link.id)">
+                                    <mat-icon class="text-red-500" [svgIcon]="'mat_outline:delete_outline'"></mat-icon>
+                                </button>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+
+                    <ng-container *ngIf="webLinkToggle">
+                        <div class="bg-slate-50 item-center p-4 mt-3">
+                            <form [formGroup]="weblinkForm">
+                                <div class="flex gap-3 ">
+                                    <div class="flex w-full justify-items-center items-center">
+                                        <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
+                                            <mat-label>Link address</mat-label>
+
+                                            <input matInput type="text" [formControlName]="'url'" />
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="flex w-full justify-items-center items-center">
+                                        <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
+                                            <mat-label>Description</mat-label>
+
+                                            <input matInput type="text" [formControlName]="'description'" />
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="flex gap-3 justify-end mt-2">
+                                <button mat-stroked-button color="warn" (click)="toggleWebLinkCreateMode()">
+                                    Cancel
+                                </button>
+                                <button mat-stroked-button [color]="'primary'" (click)="createWebLink()">
+                                    Save
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex text-center">
-                            <mat-icon class="text-red-500" svgIcon="heroicons_outline:x"></mat-icon>
-                        </div>
-                    </div>
+                    </ng-container>
+
                 </div>
 
                 <div class="activity">
@@ -146,21 +193,44 @@
 
                         <mat-tab label="Comments">
                             <div class="mt-3">
-                                <div class="mb-3">
-                                    <div class="italic">No comment</div>
-                                </div>
+                                <ng-container *ngFor="let comment of issue.comments">
+                                    <div class="flex gap-3 items-center shadow rounded p-4 bg-slate-50 mb-3">
+                                        <mat-icon class="" svgIcon="heroicons_outline:user-circle"></mat-icon>
+                                        <div class="flex flex-col w-full">
+                                            <div class="flex">
+                                                <div class="flex gap-3">
+                                                    <div class="font-semibold">{{ comment.user.name }}</div>
+                                                    <div class="">{{ comment.createAt | date:'fullDate' }} at {{
+                                                        comment.createAt | date: 'hh:mm' }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="flex italic">{{ comment.content }}</div>
+                                        </div>
+                                        <button mat-icon-button (click)="deleteComment(comment.id)">
+                                            <mat-icon class="text-red-500"
+                                                [svgIcon]="'mat_outline:delete_outline'"></mat-icon>
+                                        </button>
+                                    </div>
+                                </ng-container>
+                                <ng-container *ngIf="issue.comments.length === 0">
+                                    <div class="mb-3">
+                                        <div class="italic">No comment</div>
+                                    </div>
+                                </ng-container>
                                 <div class="flex gap-3 justify-between items-center">
                                     <mat-icon class="icon-size-12" svgIcon="heroicons_outline:user-circle"></mat-icon>
                                     <div class="w-full">
-                                        <!-- Comment -->
-                                        <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
-                                            <textarea matInput [formControlName]="'name'" [rows]="1" cdkTextareaAutosize
-                                                [cdkAutosizeMinRows]="1"></textarea>
-                                        </mat-form-field>
+                                        <form [formGroup]="commentForm">
+                                            <!-- Comment -->
+                                            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
+                                                <textarea matInput [formControlName]="'content'" [rows]="1"
+                                                    cdkTextareaAutosize [cdkAutosizeMinRows]="1"></textarea>
+                                            </mat-form-field>
+                                        </form>
                                     </div>
                                 </div>
                                 <div class="flex justify-end mt-3">
-                                    <button mat-flat-button [color]="'primary'">
+                                    <button mat-flat-button [color]="'primary'" (click)="postComment()">
                                         Comment
                                     </button>
                                 </div>
@@ -169,6 +239,33 @@
 
                         <mat-tab label="Work log">
                             <!-- Work log content -->
+                            <div class="mt-3">
+                                <ng-container *ngFor="let logWork of issue.logWorks">
+                                    <div class="flex gap-3 items-center shadow rounded p-4 bg-slate-50 mb-3">
+                                        <mat-icon class="" svgIcon="heroicons_outline:user-circle"></mat-icon>
+                                        <div class="flex flex-col w-full">
+                                            <div class="flex">
+                                                <div class="flex gap-3">
+                                                    <div> <span class="font-semibold">{{ logWork.user.name }}</span>
+                                                        logged
+                                                        <span class="font-semibold">
+                                                            {{ logWork.spentTime }}h
+                                                        </span>
+                                                        <span class="">{{ logWork.createAt | date:'fullDate' }} at {{
+                                                            logWork.createAt | date: 'hh:mm' }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex italic">{{ logWork.description }}</div>
+                                        </div>
+                                        <button mat-icon-button (click)="deleteLogWork(logWork.id)">
+                                            <mat-icon class="text-red-500"
+                                                [svgIcon]="'mat_outline:delete_outline'"></mat-icon>
+                                        </button>
+                                    </div>
+                                </ng-container>
+                            </div>
+
                         </mat-tab>
 
                     </mat-tab-group>
@@ -189,6 +286,26 @@
                     <mat-label>Estimate Time <span class="italic">(hour)</span></mat-label>
                     <input matInput type="number" [formControlName]="'estimateTime'" />
                 </mat-form-field>
+
+                <div class="font-medium mb-3">Time tracking</div>
+
+                <div class="mb-3 cursor-pointer" (click)="openLogWorkDialog()">
+                    <div [ngClass]="remainingTime == 0 && spentTime ? 'bg-yellow-500 dark:bg-yellow-300' : 'bg-gray-200 h-2.5 dark:bg-gray-700'"
+                        class="w-full">
+                        <div class="bg-green-600 h-2.5 dark:bg-green-500" [style.width]="calculateTime"></div>
+                    </div>
+                    <div class="flex justify-between">
+                        <ng-container *ngIf="spentTime">
+                            {{spentTime}}h logged
+                        </ng-container>
+                        <ng-container *ngIf="!spentTime">
+                            <div>No time logger</div>
+                        </ng-container>
+                        <ng-container *ngIf="remainingTime != 0">
+                            <div>{{remainingTime}}h remaining</div>
+                        </ng-container>
+                    </div>
+                </div>
 
                 <mat-form-field class="w-full">
                     <mat-label>Assignee</mat-label>

@@ -1,4 +1,4 @@
-import { IProject, IStatus, IIssue, IMember, ILabel, IPriority } from './kanban.type';
+import { IProject, IStatus, IIssue, IMember, ILabel, IPriority, IComment, ILink, ILogWork } from './kanban.type';
 // -----------------------------------------------------------------------------------------------------
 // @ Board
 // -----------------------------------------------------------------------------------------------------
@@ -126,14 +126,17 @@ export class Issue implements Required<IIssue>
     description: string | null;
     isChild: boolean;
     labels: Label[];
+    links: Link[];
+    logWorks: LogWork[];
+    comments: Comment[];
     dueDate: string | null;
     priorityId: string | null;
     assignee: IMember | null;
     reporter: IMember | null;
-    estimateTime: string | null;
-    typeId: string | null;
+    estimateTime: number | null;
+    type: any | null;
     isClose: boolean | null;
-    childIssues: Issue[];
+    childIssues: any[];
     createAt: string | null;
     updateAt: string | null;
     resolveAt: string | null;
@@ -150,17 +153,21 @@ export class Issue implements Required<IIssue>
         this.isChild = card.isChild;
         this.description = card.description || null;
         this.labels = [];
+        this.links = [];
+        this.logWorks = [];
+        this.comments = [];
         this.dueDate = card.dueDate || null;
         this.priorityId = card.priorityId || null;
         this.assignee = card.assignee || null;
         this.childIssues = [];
         this.reporter = card.reporter || null;
         this.estimateTime = card.estimateTime || null;
-        this.typeId = card.typeId || null;
+        this.type = card.type || null;
         this.createAt = card.createAt || null;
         this.updateAt = card.updateAt || null;
         this.resolveAt = card.resolveAt || null;
         this.isClose = card.isClose || null;
+
         // Labels
         if (card.labels) {
             this.labels = card.labels.map((label) => {
@@ -171,15 +178,40 @@ export class Issue implements Required<IIssue>
                 return label;
             });
         }
+
+        // Comments
+        if (card.comments) {
+            this.comments = card.comments.map((comment) => {
+                if (!(comment instanceof Comment)) {
+                    return new Comment(comment);
+                }
+                return comment;
+            });
+        }
+
+        // Comments
+        if (card.links) {
+            this.links = card.links.map((link) => {
+                if (!(link instanceof Link)) {
+                    return new Link(link);
+                }
+                return link;
+            });
+        }
+
+        // Logworks
+        if (card.logWorks) {
+            this.logWorks = card.logWorks.map((logWork) => {
+                if (!(logWork instanceof LogWork)) {
+                    return new LogWork(logWork);
+                }
+                return logWork;
+            });
+        }
+
         // Issues
         if (card.childIssues) {
-            this.childIssues = card.childIssues.map((issue) => {
-                if (!(issue instanceof Issue)) {
-                    return new Issue(issue);
-                }
-
-                return issue;
-            });
+            this.childIssues = card.childIssues;
         }
     }
 }
@@ -243,3 +275,73 @@ export class Priority implements Required<IPriority>
     }
 }
 
+// -----------------------------------------------------------------------------------------------------
+// @ Comment
+// -----------------------------------------------------------------------------------------------------
+export class Comment implements Required<IComment>
+{
+    id: string | null;
+    user: string;
+    issueId: string;
+    content: string;
+    createAt: string;
+
+    /**
+     * Constructor
+     */
+    constructor(comment: IComment) {
+        this.id = comment.id || null;
+        this.user = comment.user;
+        this.issueId = comment.issueId;
+        this.content = comment.content;
+        this.createAt = comment.createAt;
+    }
+}
+
+// -----------------------------------------------------------------------------------------------------
+// @ Link
+// -----------------------------------------------------------------------------------------------------
+export class Link implements Required<ILink>
+{
+    id: string | null;
+    issueId: string;
+    url: string;
+    description: string;
+
+    /**
+     * Constructor
+     */
+    constructor(link: ILink) {
+        this.id = link.id || null;
+        this.issueId = link.issueId;
+        this.url = link.url;
+        this.description = link.description;
+    }
+}
+
+// -----------------------------------------------------------------------------------------------------
+// @ Log work
+// -----------------------------------------------------------------------------------------------------
+export class LogWork implements Required<ILogWork>
+{
+    id: string | null;
+    issueId: string;
+    user: any;
+    remainingTime: number;
+    spentTime: number;
+    description: string;
+    createAt: string;
+
+    /**
+     * Constructor
+     */
+    constructor(logWork: ILogWork) {
+        this.id = logWork.id || null;
+        this.issueId = logWork.issueId;
+        this.user = logWork.user;
+        this.remainingTime = logWork.remainingTime;
+        this.spentTime = logWork.spentTime;
+        this.description = logWork.description;
+        this.createAt = logWork.createAt;
+    }
+}

@@ -1,0 +1,94 @@
+<div class="relative flex flex-col w-full h-full">
+
+    <!-- Dismiss button -->
+    <ng-container>
+        <div class="absolute top-0 right-0">
+            <button mat-icon-button [matDialogClose]="undefined" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+            </button>
+        </div>
+    </ng-container>
+
+    <!-- Content -->
+    <div class="flex flex-col sm:flex-row flex-auto items-center sm:items-start p-6">
+
+        <div class="w-full">
+
+            <div class="font-semibold mb-3">Time tracking</div>
+
+            <div class="mb-3">
+                <div [ngClass]="remainingTime == 0 && spentTime && issue.estimateTime > 0                    ? 
+                    'bg-yellow-500 dark:bg-yellow-300' : 
+                    'bg-gray-200 h-2.5 dark:bg-gray-700'" class="w-full">
+                    <div class="bg-green-600 h-2.5 dark:bg-green-500" [style.width]="calculateTime"></div>
+                </div>
+                <div class="flex justify-between">
+                    <ng-container *ngIf="spentTime">
+                        {{spentTime}}h logged
+                    </ng-container>
+                    <ng-container *ngIf="!spentTime">
+                        <div>No time logger</div>
+                    </ng-container>
+                    <ng-container *ngIf="remainingTime != 0">
+                        <div>{{remainingTime}}h remaining</div>
+                    </ng-container>
+                </div>
+            </div>
+            <ng-container *ngIf="issue.estimateTime">
+                <div class="mb-3">
+                    <div>
+                        <span class="italic">The original estimate for this issue was </span>
+                        <span class="font-medium">{{ issue.estimateTime }}h</span>
+                    </div>
+                </div>
+            </ng-container>
+            <div class="mb-3">
+                <form [formGroup]="logWorkForm">
+                    <div class="flex gap-3 mb-3">
+                        <div class="flex w-full justify-items-center items-center">
+                            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
+                                <mat-label>Time spent (hour)</mat-label>
+
+                                <input matInput type="number" step="1" [formControlName]="'spentTime'" />
+                            </mat-form-field>
+                        </div>
+                        <div class="flex w-full justify-items-center items-center">
+                            <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
+                                <mat-label>Time remaining (hour)</mat-label>
+
+                                <input matInput type="number" step="1" [formControlName]="'remainingTime'" />
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="flex w-full justify-items-center items-center">
+                        <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
+                            <mat-label>Work description</mat-label>
+                            <textarea matInput [formControlName]="'description'" [rows]="2" cdkTextareaAutosize
+                                [cdkAutosizeMinRows]="2"></textarea>
+                        </mat-form-field>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Actions -->
+    <ng-container>
+        <div class="flex items-center justify-center sm:justify-end px-6 py-4 space-x-3">
+
+            <!-- Cancel -->
+            <ng-container>
+                <button mat-stroked-button [matDialogClose]="'cancelled'">
+                    Cancel
+                </button>
+                <button mat-raised-button [color]="'primary'" (click)="createLogWork()">
+                    Save
+                </button>
+            </ng-container>
+
+        </div>
+    </ng-container>
+
+</div>
