@@ -12,6 +12,7 @@ import { DateTime } from 'luxon';
 import { Subject, takeUntil } from 'rxjs';
 import { Project } from '../kanban.model';
 import { Issue, Status } from './../kanban.model';
+import { SettingComponent } from '../card/settings/setting.component';
 
 @Component({
     selector: 'scrumboard-board',
@@ -25,6 +26,8 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
     project: Project;
     listTitleForm: UntypedFormGroup;
     filterMode: 'Default' | 'Subtask' = 'Default';
+    user: any;
+    isOwner: boolean = false;
 
     // Private
     private readonly _positionStep: number = 65536;
@@ -52,6 +55,10 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
+
+        //Get user from local storage 
+        this.user = JSON.parse(localStorage.getItem('user'));
+
         // Initialize the list title form
         this.listTitleForm = this._formBuilder.group({
             title: ['']
@@ -72,6 +79,13 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((project: Project) => {
                 this.project = { ...project };
+
+                // Check if user is project owner
+                if (this.project.leader.id === this.user.id) {
+                    this.isOwner = true;
+                } else {
+                    this.isOwner = false;
+                }
 
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
@@ -206,6 +220,15 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
     openAddMemberDialog() {
         this._dialog.open(AddMemberComponent, {
             width: '720px',
+            data: {
+                project: this.project
+            }
+        }).afterClosed().subscribe();
+    }
+
+    openSettingDialog() {
+        this._dialog.open(SettingComponent, {
+            width: '480px',
             data: {
                 project: this.project
             }

@@ -141,7 +141,7 @@ export class ScrumboardService {
                 map((newBoard) => {
 
                     // Update the boards with the new board
-                    this._projects.next([...boards, newBoard]);
+                    this._projects.next([newBoard, ...boards]);
 
                     // Return new board from observable
                     return newBoard;
@@ -762,6 +762,29 @@ export class ScrumboardService {
         );
     }
 
+    // Create child issue
+    createChildIssue(data) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.post<any>('/api/issues/child', data).pipe(
+                map((newChild) => {
+
+                    // Update the board labels with the new label
+                    board.childIssues = [...board.childIssues, newChild];
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    console.log(this._issue.value.childIssues);
+
+
+                    // Return new label from observable
+                    return newChild;
+                })
+            ))
+        );
+    }
+
     // Delete web link
     deleteWebLink(id: string) {
         return this.issue$.pipe(
@@ -825,6 +848,22 @@ export class ScrumboardService {
 
                     // Return the deleted status
                     return isDeleted;
+                })
+            ))
+        );
+    }
+
+    updateProject(id, project) {
+        return this.project$.pipe(
+            take(1),
+            switchMap(() => this._httpClient.put<Project>('/api/projects/' + id, project).pipe(
+                map((updatedLabel) => {
+
+                    // Update the board
+                    this._project.next(updatedLabel);
+
+                    // Return the updated label
+                    return updatedLabel;
                 })
             ))
         );

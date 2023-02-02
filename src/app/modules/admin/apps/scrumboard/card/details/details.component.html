@@ -48,7 +48,7 @@
                         Attach
                     </button>
 
-                    <button class="" mat-stroked-button>
+                    <button class="" mat-stroked-button (click)="toggleChildIssueCreateMode()">
                         <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:adjustments'"></mat-icon>
                         Child Issue
                     </button>
@@ -105,16 +105,15 @@
                 </div>
 
                 <div class="child-issues mb-3">
-                    <div class="font-medium">Child issues</div>
-
                     <ng-container *ngIf="issue.childIssues && issue.childIssues.length > 0">
+                        <div class="font-medium">Child issues</div>
                         <ng-container *ngFor="let child of issue.childIssues">
-                            <div class="flex justify-between w-full p-4 shadow rounded-sm cursor-pointer mb-3">
-                                <div class="flex gap-4 items-center">
-                                    <mat-icon class="text-blue-500" svgIcon="heroicons_outline:bookmark"></mat-icon>
-                                    <span class="truncate">{{ child.name }}</span>
+                            <div class="flex justify-between p-4 shadow rounded-sm cursor-pointer mb-3">
+                                <div class="flex gap-4 w-full items-center">
+                                    <mat-icon class="text-blue-500" svgIcon="heroicons_outline:adjustments"></mat-icon>
+                                    <div class="max-w-60">{{ child.name }}</div>
                                 </div>
-                                <div class="flex gap-4 items-center">
+                                <div class="flex w-full gap-4 items-center justify-end">
                                     <mat-icon svgIcon="mat_outline:menu"></mat-icon>
                                     <div class="flex gap-2">
                                         <mat-icon svgIcon="heroicons_outline:user-circle"></mat-icon>
@@ -132,6 +131,27 @@
                             </div>
                         </ng-container>
                     </ng-container>
+
+                    <ng-container *ngIf="childIssueToggle">
+                        <div class="font-medium">Child issues</div>
+                        <div class="shadow rounded-sm item-center p-4 mt-3">
+                            <form [formGroup]="childIssueForm">
+                                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full">
+                                    <mat-label>What needs to be done?</mat-label>
+                                    <input matInput type="text" [formControlName]="'name'" />
+                                </mat-form-field>
+                            </form>
+                            <div class="flex gap-3 justify-end mt-2">
+                                <button mat-stroked-button color="warn" (click)="toggleChildIssueCreateMode()">
+                                    Cancel
+                                </button>
+                                <button mat-stroked-button [color]="'primary'" (click)="createChildIssue()">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </ng-container>
+
                 </div>
 
                 <div class="web-links mb-3">
@@ -155,7 +175,7 @@
                     </ng-container>
 
                     <ng-container *ngIf="webLinkToggle">
-                        <div class="bg-slate-50 item-center p-4 mt-3">
+                        <div class="shadow rounded-sm item-center p-4 mt-3">
                             <form [formGroup]="weblinkForm">
                                 <div class="flex gap-3 ">
                                     <div class="flex w-full justify-items-center items-center">
@@ -194,7 +214,7 @@
                         <mat-tab label="Comments">
                             <div class="mt-3">
                                 <ng-container *ngFor="let comment of issue.comments">
-                                    <div class="flex gap-3 items-center shadow rounded p-4 bg-slate-50 mb-3">
+                                    <div class="flex gap-3 items-center shadow rounded p-4 mb-3">
                                         <mat-icon class="" svgIcon="heroicons_outline:user-circle"></mat-icon>
                                         <div class="flex flex-col w-full">
                                             <div class="flex">
@@ -206,14 +226,15 @@
                                             </div>
                                             <div class="flex italic">{{ comment.content }}</div>
                                         </div>
-                                        <button mat-icon-button (click)="deleteComment(comment.id)">
+                                        <button *ngIf="comment.user.id === user.id" mat-icon-button
+                                            (click)="deleteComment(comment.id)">
                                             <mat-icon class="text-red-500"
                                                 [svgIcon]="'mat_outline:delete_outline'"></mat-icon>
                                         </button>
                                     </div>
                                 </ng-container>
                                 <ng-container *ngIf="issue.comments.length === 0">
-                                    <div class="mb-3">
+                                    <div class="flex justify-center w-full mb-3">
                                         <div class="italic">No comment</div>
                                     </div>
                                 </ng-container>
@@ -240,8 +261,13 @@
                         <mat-tab label="Work log">
                             <!-- Work log content -->
                             <div class="mt-3">
+                                <ng-container *ngIf="issue.logWorks.length === 0">
+                                    <div class="flex justify-center w-full mb-3">
+                                        <div class="italic">No work log</div>
+                                    </div>
+                                </ng-container>
                                 <ng-container *ngFor="let logWork of issue.logWorks">
-                                    <div class="flex gap-3 items-center shadow rounded p-4 bg-slate-50 mb-3">
+                                    <div class="flex gap-3 items-center shadow rounded p-4 mb-3">
                                         <mat-icon class="" svgIcon="heroicons_outline:user-circle"></mat-icon>
                                         <div class="flex flex-col w-full">
                                             <div class="flex">
@@ -258,7 +284,8 @@
                                             </div>
                                             <div class="flex italic">{{ logWork.description }}</div>
                                         </div>
-                                        <button mat-icon-button (click)="deleteLogWork(logWork.id)">
+                                        <button *ngIf="logWork.user.id === user.id" mat-icon-button
+                                            (click)="deleteLogWork(logWork.id)">
                                             <mat-icon class="text-red-500"
                                                 [svgIcon]="'mat_outline:delete_outline'"></mat-icon>
                                         </button>

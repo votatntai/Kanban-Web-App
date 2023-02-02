@@ -18,7 +18,7 @@
                 <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:plus'"></mat-icon>
                 Member
             </button>
-            <button class="ml-3" mat-stroked-button>
+            <button *ngIf="isOwner" class="ml-3" mat-stroked-button (click)="openSettingDialog()">
                 <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:cog'"></mat-icon>
                 Settings
             </button>
@@ -50,8 +50,12 @@
 
                                         <div class="flex items-center justify-between" cdkDragHandle>
                                             <div
-                                                class="flex items-center w-full py-2 px-3 rounded-md cursor-text border border-transparent focus-within:bg-white focus-within:shadow-sm focus-within:border-primary dark:focus-within:bg-gray-900">
-                                                <input class="w-full font-medium leading-5 bg-transparent"
+                                                class="flex items-center w-full py-2 px-3 rounded-md border border-transparent focus-within:bg-white focus-within:shadow-sm focus-within:border-primary dark:focus-within:bg-gray-900">
+                                                <div *ngIf="!isOwner" class="font-medium leading-5 bg-transparent">
+                                                    {{ status.name }}
+                                                </div>
+                                                <input *ngIf="isOwner"
+                                                    class="w-full font-medium leading-5 bg-transparent"
                                                     [spellcheck]="'false'" [value]="status.name"
                                                     (focusout)="updateListTitle($event, status)"
                                                     (keydown.enter)="listTitleInput.blur()" #listTitleInput>
@@ -64,7 +68,7 @@
                                                 class="flex items-center justify-center min-w-6 ml-4 text-sm font-semibold leading-6 rounded-full">
                                                 {{filterSubTask(status.issues, false).length}}
                                             </div>
-                                            <div class="ml-1">
+                                            <div *ngIf="isOwner" class="ml-1">
                                                 <button class="w-8 h-8 min-h-8" mat-icon-button
                                                     [matMenuTriggerFor]="listMenu">
                                                     <mat-icon class="icon-size-5"
@@ -169,7 +173,7 @@
                     </ng-container>
 
                     <!-- New list -->
-                    <scrumboard-board-add-list (saved)="addList($event)" [buttonTitle]="'Add a column'">
+                    <scrumboard-board-add-list *ngIf="isOwner" (saved)="addList($event)" [buttonTitle]="'Add a column'">
                     </scrumboard-board-add-list>
 
                 </div>

@@ -21,8 +21,8 @@ export class AddMemberComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) public data: any,
         public dialogRef: MatDialogRef<AddMemberComponent>,
         private _formBuilder: UntypedFormBuilder,
+        private _scrumboardService: ScrumboardService,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _scrumboardService: ScrumboardService
     ) { }
 
     ngOnInit() {

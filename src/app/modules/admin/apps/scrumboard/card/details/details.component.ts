@@ -32,12 +32,14 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
     tagsEditMode: boolean = false;
     commentForm: UntypedFormGroup;
     webLinkToggle: boolean = false;
+    childIssueToggle: boolean = false;
     weblinkForm: UntypedFormGroup;
-    urlPattern: string = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
+    urlPattern = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
     spentTime: number = null;
     remainingTime: number = 0;
     calculateTime: string = '0';
     timeRemaining: string = '0';
+    childIssueForm: UntypedFormGroup;
 
     // Private
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -85,7 +87,6 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((card) => {
                 this.issue = card;
-                console.log(card);
                 this.calculateTimeTracking();
             });
 
@@ -116,6 +117,8 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             description: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(256)]]
         });
 
+        // Prepare the child issue form
+        this.initialChildIssueForm();
 
         // Fill the form
         this.cardForm.setValue({
@@ -182,6 +185,21 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
 
     toggleWebLinkCreateMode() {
         this.webLinkToggle = !this.webLinkToggle;
+    }
+
+    toggleChildIssueCreateMode() {
+        this.childIssueToggle = !this.childIssueToggle;
+    }
+
+    initialChildIssueForm() {
+        this.childIssueForm = this._formBuilder.group({
+            name: ['', Validators.required],
+            description: [''],
+            priorityId: [this.issue.priorityId, Validators.required],
+            statusId: [this.issue.statusId, Validators.required],
+            parentId: [this.issue.id, Validators.required],
+            projectId: [this.issue.projectId, Validators.required]
+        });
     }
 
     /**
@@ -548,10 +566,16 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
         this._changeDetectorRef.markForCheck();
     }
 
-    redirectToChild(child: any) {
-        console.log(child);
-        this.matDialogRef.close();
-        this._router.navigate(['boards/' + child.projectId + '/card/', child.id]);
+    createChildIssue() {
+        if (this.childIssueForm.valid) {
+            this._scrumboardService.createChildIssue(this.childIssueForm.value).subscribe(result => {
+                console.log(result);
+                this.childIssueForm.reset();
+                this.childIssueToggle = false;
+                this.initialChildIssueForm();
+                this._changeDetectorRef.markForCheck();
+            })
+        }
     }
 
     /**

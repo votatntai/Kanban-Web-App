@@ -6,6 +6,7 @@ export class Project implements Required<IProject>
 {
     id: string | null;
     name: string;
+    leader: any;
     description: string | null;
     icon: string | null;
     lastActivity: string | null;
@@ -20,6 +21,7 @@ export class Project implements Required<IProject>
     constructor(board: IProject) {
         this.id = board.id || null;
         this.name = board.name;
+        this.leader = board.leader;
         this.description = board.description || null;
         this.lastActivity = board.lastActivity || null;
         this.statuses = [];

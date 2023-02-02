@@ -1,6 +1,7 @@
 export interface IProject {
     id?: string | null;
     name: string;
+    leader?: any;
     description?: string | null;
     lastActivity?: string | null;
     statuses?: IStatus[];
