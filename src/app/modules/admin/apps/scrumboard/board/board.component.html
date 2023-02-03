@@ -10,15 +10,12 @@
             </h2>
         </div>
         <!-- Actions -->
-        <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
-            <mat-icon *ngFor="let member of project.members.slice(0, 3)" svgIcon="heroicons_outline:user-circle"
-                [matTooltip]="member.name"></mat-icon>
-            <span *ngIf="project.members.length > 3" class="ml-3">...and more</span>
+        <div *ngIf="isOwner" class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
             <button class="ml-3" mat-stroked-button (click)="openAddMemberDialog()">
-                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:user'"></mat-icon>
                 Member
             </button>
-            <button *ngIf="isOwner" class="ml-3" mat-stroked-button (click)="openSettingDialog()">
+            <button class="ml-3" mat-stroked-button (click)="openSettingDialog()">
                 <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:cog'"></mat-icon>
                 Settings
             </button>

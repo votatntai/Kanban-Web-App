@@ -1,12 +1,15 @@
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, Validators, UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Project } from '../../kanban.model';
 import { ScrumboardService } from '../../scrumboard.service';
 
 @Component({
     selector: 'app-setting',
-    templateUrl: 'setting.component.html'
+    templateUrl: 'setting.component.html',
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class SettingComponent implements OnInit {
@@ -19,6 +22,7 @@ export class SettingComponent implements OnInit {
         private _changeDetectorRef: ChangeDetectorRef,
         private _formBuilder: UntypedFormBuilder,
         private _scrumboardService: ScrumboardService,
+        private _fuseConfirmationService: FuseConfirmationService,
         public matDialogRef: MatDialogRef<SettingComponent>,
     ) { }
 
@@ -35,10 +39,20 @@ export class SettingComponent implements OnInit {
     }
 
     updateProject() {
-        this._scrumboardService.updateProject(this.project.id, this.projectForm.value).subscribe();
+        if (this.projectForm.valid) {
+            this._scrumboardService.updateProject(this.project.id, this.projectForm.value).subscribe(() => {
+                this.dialogRef.close();
+            });
+
+        }
     }
 
     leaderChanged(event) {
-        this.projectForm.controls['leaderId'].setValue(event.value);
+        this._fuseConfirmationService.open().afterClosed().subscribe(result => {
+            if (result === 'confirmed') {
+                this.projectForm.controls['leaderId'].setValue(event.value);
+            }
+            this._changeDetectorRef.markForCheck();
+        })
     }
 }

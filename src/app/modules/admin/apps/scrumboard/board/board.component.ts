@@ -64,16 +64,6 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
             title: ['']
         });
 
-        // Get the board
-        this._scrumboardService.board$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((board: Board) => {
-                this.board = { ...board };
-
-                // Mark for check
-                this._changeDetectorRef.markForCheck();
-            });
-
         // Get the project
         this._scrumboardService.project$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -219,10 +209,7 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
 
     openAddMemberDialog() {
         this._dialog.open(AddMemberComponent, {
-            width: '720px',
-            data: {
-                project: this.project
-            }
+            width: '960px',
         }).afterClosed().subscribe();
     }
 

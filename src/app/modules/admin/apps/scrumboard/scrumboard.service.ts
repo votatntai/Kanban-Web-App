@@ -463,6 +463,34 @@ export class ScrumboardService {
     }
 
     /**
+ * Update the card
+ *
+ * @param id
+ * @param card
+ */
+    updateChildIssue(id: string, card: any): Observable<Issue> {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.put<any>('/api/issues/child/' + id, card).pipe(
+                map((updatedCard) => {
+
+                    board.childIssues.forEach((cardItem, index, array) => {
+                        if (cardItem.id === id) {
+                            array[index] = updatedCard;
+                        }
+                    })
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return the updated card
+                    return updatedCard;
+                })
+            ))
+        );
+    }
+
+    /**
      * Update the cards
      *
      * @param cards
@@ -688,6 +716,29 @@ export class ScrumboardService {
         );
     }
 
+    // Post comment
+    postCommentForChild(comment) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.post<Comment>('/api/comments', comment).pipe(
+                map((newComment) => {
+
+                    board.childIssues.forEach((childIssue) => {
+                        if (childIssue.id === comment.issueId) {
+                            childIssue.comments = [...childIssue.comments, newComment];
+                        }
+                    });
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return new label from observable
+                    return newComment;
+                })
+            ))
+        );
+    }
+
     // Delete comment
     deleteComment(id: string) {
         return this.issue$.pipe(
@@ -701,16 +752,33 @@ export class ScrumboardService {
                     // Delete the label
                     board.comments.splice(index, 1);
 
-                    // If the label is deleted...
-                    if (isDeleted) {
-                        // Remove the label from any card that uses it
-                        board.comments.forEach((comment) => {
-                            const labelIndex = board.comments.findIndex(label => label.id === id);
-                            if (labelIndex > -1) {
-                                board.comments.splice(labelIndex, 1);
-                            }
-                        });
-                    }
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return the deleted status
+                    return isDeleted;
+                })
+            ))
+        );
+    }
+
+    // Delete comment
+    deleteChildComment(id: string, childIssue: any) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.delete('/api/comments/' + id).pipe(
+                map((isDeleted: boolean) => {
+
+                    board.childIssues.forEach(child => {
+                        if (child.id === childIssue.id) {
+                            child.comments.forEach(comment => {
+                                if (comment.id === id) {
+                                    const index = child.comments.findIndex(item => item.id === id);
+                                    child.comments.splice(index, 1);
+                                }
+                            });
+                        }
+                    })
 
                     // Update the board
                     this._issue.next(board);
@@ -905,6 +973,30 @@ export class ScrumboardService {
                     return member;
                 })
             ))
+        );
+    }
+
+    // Delete comment
+    removeMember(id: string, projectId: string) {
+        return this.project$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.delete('/api/projects/member/',
+                { params: { memberId: id, projectId: projectId } }).pipe(
+                    map((isDeleted: boolean) => {
+
+                        board.members.forEach((member, index, array) => {
+                            if (member.id === id) {
+                                array.splice(index, 1);
+                            }
+                        });
+
+                        // Update the board
+                        this._project.next(board);
+
+                        // Return the deleted status
+                        return isDeleted;
+                    })
+                ))
         );
     }
 }

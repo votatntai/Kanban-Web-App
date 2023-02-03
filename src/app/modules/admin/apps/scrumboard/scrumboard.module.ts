@@ -1,3 +1,4 @@
+import { ChildDetailsComponent } from './card/child-details/child-details.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NgModule } from '@angular/core';
 import { MatLuxonDateModule, MAT_LUXON_DATE_FORMATS } from '@angular/material-luxon-adapter';
@@ -44,6 +45,7 @@ import { SettingComponent } from './card/settings/setting.component';
         CreateBoardComponent,
         AddMemberComponent,
         LogWorkComponent,
+        ChildDetailsComponent,
         SettingComponent,
         DateAgoPipe
     ],

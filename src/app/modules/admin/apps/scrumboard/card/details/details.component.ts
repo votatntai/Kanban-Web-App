@@ -8,6 +8,7 @@ import { ScrumboardService } from 'app/modules/admin/apps/scrumboard/scrumboard.
 import { DateTime } from 'luxon';
 import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
 import { Issue, Label, LogWork, Member, Priority, Project } from './../../kanban.model';
+import { ChildDetailsComponent } from './../child-details/child-details.component';
 import { LogWorkComponent } from './log-work/log-work.component';
 
 @Component({
@@ -80,6 +81,8 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
 
                 // Get the labels
                 this.tags = this.filteredTags = board.labels;
+
+                this._changeDetectorRef.markForCheck();
             });
 
         // Get the card details
@@ -104,11 +107,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
         });
 
         // Prepare the comment form
-        this.commentForm = this._formBuilder.group({
-            userId: [this.user.id, Validators.required],
-            issueId: [this.issue.id, Validators.required],
-            content: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(256)]]
-        });
+        this.initialCommentForm();
 
         // Prepare the web link form
         this.weblinkForm = this._formBuilder.group({
@@ -199,6 +198,14 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             statusId: [this.issue.statusId, Validators.required],
             parentId: [this.issue.id, Validators.required],
             projectId: [this.issue.projectId, Validators.required]
+        });
+    }
+
+    initialCommentForm() {
+        this.commentForm = this._formBuilder.group({
+            userId: [this.user.id, Validators.required],
+            issueId: [this.issue.id, Validators.required],
+            content: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(256)]]
         });
     }
 
@@ -467,6 +474,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             this._scrumboardService.postComment(this.commentForm.value).subscribe(result => {
                 if (result) {
                     this.commentForm.reset();
+                    this.initialCommentForm();
                 }
                 this._changeDetectorRef.markForCheck();
             })
@@ -569,13 +577,21 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
     createChildIssue() {
         if (this.childIssueForm.valid) {
             this._scrumboardService.createChildIssue(this.childIssueForm.value).subscribe(result => {
-                console.log(result);
                 this.childIssueForm.reset();
                 this.childIssueToggle = false;
                 this.initialChildIssueForm();
                 this._changeDetectorRef.markForCheck();
             })
         }
+    }
+
+    openChildDetailDialog(child) {
+        this._dialog.open(ChildDetailsComponent, {
+            width: '960px',
+            data: {
+                child: child
+            }
+        })
     }
 
     /**
