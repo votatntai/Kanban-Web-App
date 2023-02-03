@@ -1,4 +1,4 @@
-import { IProject, IStatus, IIssue, IMember, ILabel, IPriority, IComment, ILink, ILogWork } from './kanban.type';
+import { IAttachment, IComment, IIssue, ILabel, ILink, ILogWork, IMember, IPriority, IProject, IStatus } from './kanban.type';
 // -----------------------------------------------------------------------------------------------------
 // @ Board
 // -----------------------------------------------------------------------------------------------------
@@ -131,6 +131,7 @@ export class Issue implements Required<IIssue>
     isChild: boolean;
     labels: Label[];
     links: Link[];
+    attachments: Attachment[];
     logWorks: LogWork[];
     comments: Comment[];
     dueDate: string | null;
@@ -158,6 +159,7 @@ export class Issue implements Required<IIssue>
         this.description = card.description || null;
         this.labels = [];
         this.links = [];
+        this.attachments = [];
         this.logWorks = [];
         this.comments = [];
         this.dueDate = card.dueDate || null;
@@ -210,6 +212,16 @@ export class Issue implements Required<IIssue>
                     return new LogWork(logWork);
                 }
                 return logWork;
+            });
+        }
+
+        // Attachments
+        if (card.attachments) {
+            this.attachments = card.attachments.map((attachment) => {
+                if (!(attachment instanceof Attachment)) {
+                    return new Attachment(attachment);
+                }
+                return attachment;
             });
         }
 
@@ -349,3 +361,27 @@ export class LogWork implements Required<ILogWork>
         this.createAt = logWork.createAt;
     }
 }
+
+// -----------------------------------------------------------------------------------------------------
+// @ Log work
+// -----------------------------------------------------------------------------------------------------
+export class Attachment implements Required<IAttachment>
+{
+    id: string | null;
+    issueId: string;
+    file: string;
+    name: string;
+    url: string;
+
+    /**
+     * Constructor
+     */
+    constructor(attachment: IAttachment) {
+        this.id = attachment.id || null;
+        this.issueId = attachment.issueId;
+        this.file = attachment.file;
+        this.name = attachment.name;
+        this.url = attachment.url;
+    }
+}
+

@@ -40,7 +40,8 @@
 
                 <div class="flex flex-wrap gap-3 mb-3">
 
-                    <button class="" mat-stroked-button>
+                    <input type="file" accept="image/*" #file>
+                    <button class="" mat-stroked-button (click)="file.click()">
                         <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:document-add'"></mat-icon>
                         Attach
                     </button>

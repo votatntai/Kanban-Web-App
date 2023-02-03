@@ -4,7 +4,7 @@
     <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 shadow">
         <div class="flex items-center gap-3">
             <mat-icon class="text-blue-500" svgIcon="heroicons_outline:bookmark"></mat-icon>
-            <div>{{ issue.type.name }}</div>
+            <div (click)="downloadFileAttachment('s')">{{ issue.type.name }}</div>
         </div>
         <div class="flex items-center gap-3">
             <ng-container *ngIf="issue.isClose">
@@ -43,7 +43,8 @@
 
                 <div class="flex flex-wrap gap-3 mb-3">
 
-                    <button class="" mat-stroked-button>
+                    <input class="hidden" type="file" accept="image/*" #file (change)="uploadFileAttachment($event)">
+                    <button class="" mat-stroked-button (click)="file.click()">
                         <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:document-add'"></mat-icon>
                         Attach
                     </button>
@@ -60,49 +61,38 @@
 
                 </div>
 
-                <div class="attachments mb-3">
-                    <div class="font-medium">Attachments</div>
+                <ng-container *ngIf="issue.attachments && issue.attachments.length > 0">
+                    <div class="attachments mb-3">
+                        <div class="font-medium">Attachments</div>
 
-                    <div class=" flex flex-wrap gap-3">
-                        <a class="flex flex-col w-40 h-40 p-4 shadow rounded-2xl cursor-pointer bg-card">
-                            <div class="aspect-[9/6]">
-                                <div class="flex items-center justify-center h-full">
-                                    <!-- Icons -->
-                                    <div class="relative">
-                                        <mat-icon class="icon-size-14 text-hint opacity-50"
-                                            [svgIcon]="'heroicons_solid:document'"></mat-icon>
-                                        <div class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
-                                            [class.bg-red-600]="true">
-                                            {{'pdf'.toUpperCase()}}
+                        <div class=" flex flex-wrap gap-3">
+
+                            <ng-container *ngFor="let attachment of issue.attachments">
+                                <a class="flex flex-col w-40 h-40 p-4 shadow rounded-2xl cursor-pointer bg-card">
+                                    <div class="aspect-[9/6]">
+                                        <div class="flex items-center justify-center h-full">
+                                            <!-- Icons -->
+                                            <div class="relative" (click)="downloadFileAttachment(attachment.id)">
+                                                <mat-icon class="icon-size-14 text-hint opacity-50"
+                                                    [svgIcon]="'heroicons_solid:document'"></mat-icon>
+                                                <div class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
+                                                    [class.bg-red-600]="true">
+                                                    {{attachment.name.split('.')[1].toUpperCase()}}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
-                                <div class="truncate" [matTooltip]="'Filename.doc'">File name</div>
-                            </div>
-                        </a>
-
-                        <a class="flex flex-col w-40 h-40 p-4 shadow rounded-2xl cursor-pointer bg-card">
-                            <div class="aspect-[9/6]">
-                                <div class="flex items-center justify-center h-full">
-                                    <!-- Icons -->
-                                    <div class="relative">
-                                        <mat-icon class="icon-size-14 text-hint opacity-50"
-                                            [svgIcon]="'heroicons_solid:document'"></mat-icon>
-                                        <div class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
-                                            [class.bg-blue-600]="true">
-                                            {{'doc'.toUpperCase()}}
-                                        </div>
+                                    <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
+                                        <div class="truncate" [matTooltip]="attachment.name"
+                                            (click)="downloadFileAttachment(attachment.id)">{{
+                                            attachment.name.split('.')[0] }}</div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
-                                <div class="truncate" [matTooltip]="'Filename.doc'">File name</div>
-                            </div>
-                        </a>
+                                </a>
+                            </ng-container>
+
+                        </div>
                     </div>
-                </div>
+                </ng-container>
 
                 <div class="child-issues mb-3">
                     <ng-container *ngIf="issue.childIssues && issue.childIssues.length > 0">

@@ -1,6 +1,6 @@
 import { Comment, Issue, Label, Member, Project, Status, Link, LogWork } from './kanban.model';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
 import { Board, Card } from 'app/modules/admin/apps/scrumboard/scrumboard.models';
 
@@ -1020,6 +1020,29 @@ export class ScrumboardService {
 
                     // Return the deleted status
                     return isDeleted;
+                })
+            ))
+        );
+    }
+
+    getFile(id: string) {
+        return this._httpClient.get<any>('/api/attachments/' + id)
+    }
+
+    saveFile(issueId: string, data: FormData) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.post<any>('/api/attachments', data, { params: { issueId: issueId } }).pipe(
+                map((newAttachment) => {
+
+                    // Update the board labels with the new label
+                    board.attachments = [...board.attachments, newAttachment];
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return new label from observable
+                    return newAttachment;
                 })
             ))
         );

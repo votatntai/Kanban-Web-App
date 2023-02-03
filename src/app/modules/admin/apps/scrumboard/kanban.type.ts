@@ -33,6 +33,7 @@ export interface IIssue {
     labels?: ILabel[];
     comments?: IComment[];
     links?: ILink[];
+    attachments?: IAttachment[];
     logWorks?: ILogWork[];
     dueDate?: string | null;
     priorityId?: string | null;
@@ -89,5 +90,13 @@ export interface ILogWork {
     remainingTime: number;
     description: string;
     createAt: string;
+}
+
+export interface IAttachment {
+    id: string | null;
+    issueId: string;
+    file: string;
+    name: string;
+    url: string;
 }
 

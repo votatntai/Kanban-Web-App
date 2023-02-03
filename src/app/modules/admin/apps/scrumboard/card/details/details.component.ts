@@ -211,6 +211,29 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
         });
     }
 
+    uploadFileAttachment(event) {
+        const file = event.target.files[0];
+        const formData = new FormData();
+        formData.append('file', file, file.name);
+
+        this._scrumboardService.saveFile(this.issue.id, formData).subscribe(result => {
+            if (result) {
+                console.log(result);
+                this._changeDetectorRef.markForCheck();
+            }
+        })
+    }
+
+    downloadFileAttachment(id: string) {
+        this._scrumboardService.getFile(id).subscribe(result => {
+            const blob = new Blob([result.file], { type: 'application/octet-stream' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = result.name;
+            link.click();
+        })
+    }
+
     /**
  * Filter tags
  *
