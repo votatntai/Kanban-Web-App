@@ -1,12 +1,11 @@
-import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import { CreateBoardComponent } from './create-board/create-board.comonent';
-import { Project } from './../kanban.model';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { DateTime } from 'luxon';
+import { MatDialog } from '@angular/material/dialog';
 import { Board } from 'app/modules/admin/apps/scrumboard/scrumboard.models';
 import { ScrumboardService } from 'app/modules/admin/apps/scrumboard/scrumboard.service';
-import { MatDialog } from '@angular/material/dialog';
+import { DateTime } from 'luxon';
+import { Subject, takeUntil } from 'rxjs';
+import { Project } from './../kanban.model';
+import { CreateBoardComponent } from './create-board/create-board.comonent';
 
 @Component({
     selector: 'scrumboard-boards',

@@ -843,9 +843,6 @@ export class ScrumboardService {
                     // Update the board
                     this._issue.next(board);
 
-                    console.log(this._issue.value.childIssues);
-
-
                     // Return new label from observable
                     return newChild;
                 })

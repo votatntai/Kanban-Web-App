@@ -101,6 +101,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             labels: [[]],
             estimateTime: [null, [Validators.min(0), Validators.max(72)]],
             priorityId: [null],
+            reporterId: [null],
             statusId: [null],
             assigneeId: [null],
             dueDate: [null]
@@ -127,6 +128,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             labels: this.issue.labels,
             estimateTime: this.issue.estimateTime,
             priorityId: this.issue.priorityId,
+            reporterId: this.issue.reporter.id,
             statusId: this.issue.statusId,
             assigneeId: this.issue.assignee?.id || null,
             dueDate: this.issue.dueDate
@@ -452,6 +454,13 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
         this.cardForm.controls['priorityId'].setValue(event.value);
     }
 
+    /**
+* Change issue reporter
+*/
+    reporterChanged(event: any) {
+        this.cardForm.controls['reporterId'].setValue(event.value);
+    }
+
     removeIssue() {
         var config = {
             title: `Remove "` + this.issue.name + `"`,
@@ -590,7 +599,8 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             width: '960px',
             data: {
                 child: child
-            }
+            },
+            autoFocus: false
         })
     }
 

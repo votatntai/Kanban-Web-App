@@ -452,7 +452,7 @@
 
                 <mat-form-field class="w-full">
                     <mat-label>Reporter</mat-label>
-                    <mat-select [value]="issue.reporter?.id">
+                    <mat-select [value]="issue.reporter?.id" (selectionChange)="reporterChanged($event)">
                         <mat-option *ngFor="let member  of project.members" [value]="member.id">
                             <mat-icon svgIcon="heroicons_outline:user-circle" [matTooltip]="member.email"></mat-icon>
                             {{ member.name }}

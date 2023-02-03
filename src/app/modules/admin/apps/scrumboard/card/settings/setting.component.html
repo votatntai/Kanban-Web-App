@@ -14,7 +14,16 @@
     </div>
 
     <div class="flex p-6">
+
         <form class="flex flex-col gap-3 w-full" [formGroup]="projectForm">
+
+            <div class="w-full mb-3">
+                <button class="w-full" mat-raised-button [color]="'primary'" [disabled]="!canDone"
+                    (click)="makeProjectDone()">
+                    <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                    Make Project Done
+                </button>
+            </div>
 
             <!-- Title -->
             <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript w-full mb-3">

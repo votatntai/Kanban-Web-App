@@ -76,7 +76,9 @@ export const appRoutes: Route[] = [
         children: [
             { path: 'example', loadChildren: () => import('app/modules/admin/example/example.module').then(m => m.ExampleModule) },
             { path: 'boards', loadChildren: () => import('app/modules/admin/apps/scrumboard/scrumboard.module').then(m => m.ScrumboardModule) },
-
+            // 404 & Catch all
+            { path: '404-not-found', pathMatch: 'full', loadChildren: () => import('app/modules/admin/pages/error/error-404/error-404.module').then(m => m.Error404Module) },
+            { path: '**', redirectTo: '404-not-found' }
         ]
     }
 ];

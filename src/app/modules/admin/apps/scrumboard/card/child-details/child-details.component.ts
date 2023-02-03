@@ -356,7 +356,7 @@ export class ChildDetailsComponent implements OnInit {
         this.childIssueForm.controls['priorityId'].setValue(event.value);
     }
     /**
-* Change issue priority
+* Change issue reporter
 */
     reporterChanged(event: any) {
         this.childIssueForm.controls['reporterId'].setValue(event.value);

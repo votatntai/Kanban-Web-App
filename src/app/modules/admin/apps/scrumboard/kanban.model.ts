@@ -14,6 +14,7 @@ export class Project implements Required<IProject>
     labels: Label[];
     priorities: Priority[];
     members: Member[];
+    isClose: boolean;
 
     /**
      * Constructor
@@ -28,6 +29,7 @@ export class Project implements Required<IProject>
         this.labels = [];
         this.priorities = [];
         this.members = [];
+        this.isClose = board.isClose;
 
         // Lists
         if (board.statuses) {

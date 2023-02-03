@@ -8,6 +8,7 @@ export interface IProject {
     labels?: ILabel[];
     priorities?: IPriority[];
     members?: IMember[];
+    isClose: boolean;
 }
 
 export interface IStatus {

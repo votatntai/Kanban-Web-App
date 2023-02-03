@@ -1,4 +1,3 @@
-import { ChildDetailsComponent } from './card/child-details/child-details.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NgModule } from '@angular/core';
 import { MatLuxonDateModule, MAT_LUXON_DATE_FORMATS } from '@angular/material-luxon-adapter';
@@ -29,6 +28,7 @@ import { SharedModule } from 'app/shared/shared.module';
 import { AddMemberComponent } from './board/add-member/add-member.component';
 import { RemoveStatusDialogComponent } from './board/remove-status-dialog/remove-status-dialog.component';
 import { CreateBoardComponent } from './boards/create-board/create-board.comonent';
+import { ChildDetailsComponent } from './card/child-details/child-details.component';
 import { LogWorkComponent } from './card/details/log-work/log-work.component';
 import { SettingComponent } from './card/settings/setting.component';
 
@@ -72,7 +72,7 @@ import { SettingComponent } from './card/settings/setting.component';
         {
             provide: MAT_DATE_FORMATS,
             useValue: MAT_LUXON_DATE_FORMATS
-        }
+        },
     ]
 })
 export class ScrumboardModule {

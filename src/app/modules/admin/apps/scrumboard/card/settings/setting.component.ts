@@ -1,7 +1,9 @@
+import { user } from './../../../../../../mock-api/common/user/data';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, Validators, UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { Subject, takeUntil } from 'rxjs';
 import { Project } from '../../kanban.model';
 import { ScrumboardService } from '../../scrumboard.service';
 
@@ -13,9 +15,13 @@ import { ScrumboardService } from '../../scrumboard.service';
 })
 
 export class SettingComponent implements OnInit {
+    user: any;
     project: Project;
     projectForm: UntypedFormGroup;
+    isOwner: boolean = false;
+    canDone: boolean = false;
 
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: any,
         public dialogRef: MatDialogRef<SettingComponent>,
@@ -27,8 +33,35 @@ export class SettingComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        // Get project from dialog data
-        this.project = this.data.project;
+
+        //Get user from local storage
+        this.user = JSON.parse(localStorage.getItem('user'));
+
+        // Get the project
+        this._scrumboardService.project$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((board) => {
+
+                // Board data
+                this.project = board;
+
+                // Check if user is project owner
+                if (this.project.leader.id === this.user.id) {
+                    this.isOwner = true;
+                } else {
+                    this.isOwner = false;
+                }
+
+                // Check is project can make done
+                this.project.statuses.forEach(status => {
+                    status.issues.forEach(issue => {
+                        this.canDone = false;
+                        if (!issue.isChild && issue.isClose) {
+                            this.canDone = true;
+                        }
+                    })
+                })
+            });
 
         // Init project form
         this.projectForm = this._formBuilder.group({
@@ -53,6 +86,17 @@ export class SettingComponent implements OnInit {
                 this.projectForm.controls['leaderId'].setValue(event.value);
             }
             this._changeDetectorRef.markForCheck();
+        })
+    }
+
+    makeProjectDone() {
+        this._fuseConfirmationService.open().afterClosed().subscribe(result => {
+            if (result === 'confirmed') {
+                this.project.isClose = true;
+                this._scrumboardService.updateProject(this.project.id, this.project).subscribe(() => {
+                    this._changeDetectorRef.markForCheck();
+                });
+            }
         })
     }
 }

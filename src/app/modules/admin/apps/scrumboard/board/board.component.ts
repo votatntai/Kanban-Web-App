@@ -1,6 +1,4 @@
-import { AddMemberComponent } from './add-member/add-member.component';
-import { RemoveStatusDialogComponent } from './remove-status-dialog/remove-status-dialog.component';
-import { DialogRef } from '@angular/cdk/dialog';
+import { Router } from '@angular/router';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
@@ -10,9 +8,11 @@ import { Board, List } from 'app/modules/admin/apps/scrumboard/scrumboard.models
 import { ScrumboardService } from 'app/modules/admin/apps/scrumboard/scrumboard.service';
 import { DateTime } from 'luxon';
 import { Subject, takeUntil } from 'rxjs';
+import { SettingComponent } from '../card/settings/setting.component';
 import { Project } from '../kanban.model';
 import { Issue, Status } from './../kanban.model';
-import { SettingComponent } from '../card/settings/setting.component';
+import { AddMemberComponent } from './add-member/add-member.component';
+import { RemoveStatusDialogComponent } from './remove-status-dialog/remove-status-dialog.component';
 
 @Component({
     selector: 'scrumboard-board',
@@ -41,7 +41,7 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _formBuilder: UntypedFormBuilder,
-        private _fuseConfirmationService: FuseConfirmationService,
+        private _router: Router,
         private _dialog: MatDialog,
         private _scrumboardService: ScrumboardService
     ) {
@@ -68,6 +68,22 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
         this._scrumboardService.project$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((project: Project) => {
+
+                // Check valid role or project available
+                let valid = false;
+                project.members.forEach(member => {
+                    if (member.id === this.user.id) {
+                        valid = true
+                    }
+                })
+                if (project.isClose) {
+                    valid = false
+                }
+                if (!valid) {
+                    this._router.navigate(['/404-not-found']);
+                }
+
+
                 this.project = { ...project };
 
                 // Check if user is project owner
@@ -210,15 +226,14 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
     openAddMemberDialog() {
         this._dialog.open(AddMemberComponent, {
             width: '960px',
+            autoFocus: false
         }).afterClosed().subscribe();
     }
 
     openSettingDialog() {
         this._dialog.open(SettingComponent, {
             width: '480px',
-            data: {
-                project: this.project
-            }
+            autoFocus: false
         }).afterClosed().subscribe();
     }
 

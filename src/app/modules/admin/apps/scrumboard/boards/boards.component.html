@@ -14,9 +14,13 @@
                 <a class="flex flex-col items-start justify-between w-56 p-6 shadow h-full bg-card rounded-lg hover:shadow-xl transition-shadow duration-150 ease-in-out"
                     [routerLink]="[project.id]">
                     <div class="flex flex-col items-start">
-                        <div
+                        <div *ngIf="!project.isClose"
                             class="flex items-center justify-center p-4 rounded-full bg-primary-50 text-primary-700 dark:bg-primary dark:text-on-primary">
                             <mat-icon class="text-current" svgIcon="heroicons_outline:briefcase"></mat-icon>
+                        </div>
+                        <div *ngIf="project.isClose"
+                            class="flex items-center justify-center p-4 rounded-full bg-primary-50 text-red-500 dark:bg-red-600 dark:text-on-primary">
+                            <mat-icon class="text-current" svgIcon="heroicons_outline:lock-closed"></mat-icon>
                         </div>
                         <!-- Title -->
                         <div class="mt-5 text-lg font-medium leading-5">{{project.name}}</div>

@@ -1,184 +1,195 @@
 <div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
 
-    <!-- Header -->
-    <div
-        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
-        <!-- Title -->
-        <div class="flex-1 min-w-0">
-            <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
-                {{project.name}}
-            </h2>
+    <ng-container *ngIf="!project.isClose">
+
+        <!-- Header -->
+        <div
+            class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
+            <!-- Title -->
+            <div class="flex-1 min-w-0">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    {{project.name}}
+                </h2>
+            </div>
+            <!-- Actions -->
+            <div *ngIf="isOwner" class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+                <button class="ml-3" mat-stroked-button (click)="openAddMemberDialog()">
+                    <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:user'"></mat-icon>
+                    Member
+                </button>
+                <button class="ml-3" mat-stroked-button (click)="openSettingDialog()">
+                    <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:cog'"></mat-icon>
+                    Settings
+                </button>
+            </div>
         </div>
-        <!-- Actions -->
-        <div *ngIf="isOwner" class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
-            <button class="ml-3" mat-stroked-button (click)="openAddMemberDialog()">
-                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:user'"></mat-icon>
-                Member
-            </button>
-            <button class="ml-3" mat-stroked-button (click)="openSettingDialog()">
-                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:cog'"></mat-icon>
-                Settings
-            </button>
-        </div>
-    </div>
 
-    <!-- Main -->
-    <div class="flex-auto p-6 sm:p-8 sm:pt-4 overflow-y-auto" cdkScrollable>
+        <!-- Main -->
+        <div class="flex-auto p-6 sm:p-8 sm:pt-4 overflow-y-auto" cdkScrollable>
 
-        <!-- Sub task -->
-        <ng-container *ngIf="filterMode === 'Default'">
-            <div class="flex mb-8" cdkDropList [cdkDropListData]="project.statuses"
-                [cdkDropListOrientation]="'horizontal'" (cdkDropListDropped)="listDropped($event)">
+            <!-- Sub task -->
+            <ng-container *ngIf="filterMode === 'Default'">
+                <div class="flex mb-8" cdkDropList [cdkDropListData]="project.statuses"
+                    [cdkDropListOrientation]="'horizontal'" (cdkDropListDropped)="listDropped($event)">
 
-                <!-- Group all cdkDropList's after this point together so that the cards can be transferred between lists -->
-                <div class="flex" cdkDropListGroup>
+                    <!-- Group all cdkDropList's after this point together so that the cards can be transferred between lists -->
+                    <div class="flex" cdkDropListGroup>
 
-                    <!-- Lists -->
-                    <ng-container *ngIf="filterMode === 'Default'">
-                        <div class="flex mb-8" cdkDropList [cdkDropListData]="project.statuses"
-                            [cdkDropListOrientation]="'horizontal'" (cdkDropListDropped)="listDropped($event)">
+                        <!-- Lists -->
+                        <ng-container *ngIf="filterMode === 'Default'">
+                            <div class="flex mb-8" cdkDropList [cdkDropListData]="project.statuses"
+                                [cdkDropListOrientation]="'horizontal'" (cdkDropListDropped)="listDropped($event)">
 
-                            <!-- Group all cdkDropList's after this point together so that the cards can be transferred between lists -->
-                            <div class="flex" cdkDropListGroup>
+                                <!-- Group all cdkDropList's after this point together so that the cards can be transferred between lists -->
+                                <div class="flex" cdkDropListGroup>
 
-                                <!-- List -->
-                                <ng-container *ngFor="let status of project.statuses; trackBy: trackByFn">
-                                    <div class="flex-0 w-72 p-2 rounded-2xl bg-default" cdkDrag [cdkDragLockAxis]="'x'">
+                                    <!-- List -->
+                                    <ng-container *ngFor="let status of project.statuses; trackBy: trackByFn">
+                                        <div class="flex-0 w-72 p-2 rounded-2xl bg-default" cdkDrag
+                                            [cdkDragLockAxis]="'x'">
 
-                                        <div class="flex items-center justify-between" cdkDragHandle>
-                                            <div
-                                                class="flex items-center w-full py-2 px-3 rounded-md border border-transparent focus-within:bg-white focus-within:shadow-sm focus-within:border-primary dark:focus-within:bg-gray-900">
-                                                <div *ngIf="!isOwner" class="font-medium leading-5 bg-transparent">
-                                                    {{ status.name }}
+                                            <div class="flex items-center justify-between" cdkDragHandle>
+                                                <div
+                                                    class="flex items-center w-full py-2 px-3 rounded-md border border-transparent focus-within:bg-white focus-within:shadow-sm focus-within:border-primary dark:focus-within:bg-gray-900">
+                                                    <div *ngIf="!isOwner" class="font-medium leading-5 bg-transparent">
+                                                        {{ status.name }}
+                                                    </div>
+                                                    <input *ngIf="isOwner"
+                                                        class="w-full font-medium leading-5 bg-transparent"
+                                                        [spellcheck]="'false'" [value]="status.name"
+                                                        (focusout)="updateListTitle($event, status)"
+                                                        (keydown.enter)="listTitleInput.blur()" #listTitleInput>
                                                 </div>
-                                                <input *ngIf="isOwner"
-                                                    class="w-full font-medium leading-5 bg-transparent"
-                                                    [spellcheck]="'false'" [value]="status.name"
-                                                    (focusout)="updateListTitle($event, status)"
-                                                    (keydown.enter)="listTitleInput.blur()" #listTitleInput>
-                                            </div>
-                                            <ng-container *ngIf="status.isLast">
-                                                <mat-icon class="ml-4 text-green-500"
-                                                    svgIcon="heroicons_outline:check-circle"></mat-icon>
-                                            </ng-container>
-                                            <div [ngClass]="status.limit && status.limit === filterSubTask(status.issues, false).length ? 'bg-red-500 text-white dark:bg-red-700' : 'bg-gray-300 text-secondary dark:bg-gray-700'"
-                                                class="flex items-center justify-center min-w-6 ml-4 text-sm font-semibold leading-6 rounded-full">
-                                                {{filterSubTask(status.issues, false).length}}
-                                            </div>
-                                            <div *ngIf="isOwner" class="ml-1">
-                                                <button class="w-8 h-8 min-h-8" mat-icon-button
-                                                    [matMenuTriggerFor]="listMenu">
-                                                    <mat-icon class="icon-size-5"
-                                                        [svgIcon]="'heroicons_solid:dots-vertical'">
-                                                    </mat-icon>
-                                                </button>
-                                                <mat-menu #listMenu="matMenu">
-                                                    <button mat-menu-item (click)="renameList(listTitleInput)">
-                                                        <mat-icon class="icon-size-5"
-                                                            [svgIcon]="'heroicons_solid:pencil-alt'">
-                                                        </mat-icon>
-                                                        Rename
-                                                    </button>
-                                                    <button *ngIf="project.statuses.length > 1" mat-menu-item
-                                                        (click)="deleteList(status)">
-                                                        <mat-icon class="icon-size-5"
-                                                            [svgIcon]="'heroicons_solid:trash'"></mat-icon>
-                                                        Delete
-                                                    </button>
-                                                </mat-menu>
-                                            </div>
-                                        </div>
-
-                                        <!-- Cards -->
-                                        <div
-                                            class="mt-2 items-stretch rounded-xl bg-gray-400 bg-opacity-12 dark:bg-transparent dark:border">
-                                            <div [id]="status.id" class="p-3 h-full" cdkDropList
-                                                [cdkDropListData]="status.issues"
-                                                (cdkDropListDropped)="cardDropped($event)">
-
-                                                <!-- New card -->
-                                                <scrumboard-board-add-card (saved)="addCard(status, $event)"
-                                                    [buttonTitle]="'Add issue'">
-                                                </scrumboard-board-add-card>
-
-                                                <!-- Card -->
-                                                <ng-container
-                                                    *ngFor="let issue of filterSubTask(status.issues, false); trackBy: trackByFn">
-                                                    <ng-container *ngIf="!issue.isChild">
-                                                        <a class="flex flex-col items-start mb-3 p-5 space-y-3 shadow rounded-lg overflow-hidden bg-card"
-                                                            [routerLink]="['card', issue.id]" cdkDrag>
-                                                            <!-- Cover image -->
-                                                            <ng-container *ngIf="issue.coverImage">
-                                                                <div class="-mx-5 -mt-5 mb-2">
-                                                                    <img class="w-full object-cover"
-                                                                        [src]="issue.coverImage">
-                                                                </div>
-                                                            </ng-container>
-                                                            <!-- Title -->
-                                                            <div class="text-lg font-medium leading-5">{{issue.name}}
-                                                            </div>
-                                                            <!-- Labels -->
-                                                            <ng-container *ngIf="issue.labels && issue.labels.length">
-                                                                <div>
-                                                                    <div class="flex flex-wrap -mx-1 -mb-2">
-                                                                        <ng-container
-                                                                            *ngFor="let label of issue.labels; trackBy: trackByFn">
-                                                                            <div
-                                                                                class="mx-1 mb-2 py-0.5 px-3 rounded-full text-sm font-medium text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
-                                                                                {{label.name}}
-                                                                            </div>
-                                                                        </ng-container>
-                                                                    </div>
-                                                                </div>
-                                                            </ng-container>
-
-                                                            <!-- Assignee -->
-                                                            <ng-container *ngIf="issue.assignee">
-                                                                <div
-                                                                    class="flex items-center rounded text-sm text-blue-500 font-medium leading-5">
-                                                                    <mat-icon class="icon-size-4 text-current"
-                                                                        [svgIcon]="'heroicons_outline:user'"></mat-icon>
-                                                                    <div class="ml-1">
-                                                                        {{ issue.assignee.name }}
-                                                                    </div>
-                                                                </div>
-                                                            </ng-container>
-
-                                                            <!-- Due date -->
-                                                            <ng-container *ngIf="issue.dueDate">
-                                                                <div class="flex items-center rounded text-sm font-medium leading-5 text-secondary"
-                                                                    [ngClass]="{'text-red-600': isOverdue(issue.dueDate) && !issue.isClose}">
-                                                                    <mat-icon class="icon-size-4 text-current"
-                                                                        [svgIcon]="'heroicons_outline:clock'"></mat-icon>
-                                                                    <div class="ml-1">
-                                                                        {{issue.dueDate | date: 'longDate'}}
-                                                                    </div>
-                                                                </div>
-                                                            </ng-container>
-                                                        </a>
-                                                    </ng-container>
+                                                <ng-container *ngIf="status.isLast">
+                                                    <mat-icon class="ml-4 text-green-500"
+                                                        svgIcon="heroicons_outline:check-circle"></mat-icon>
                                                 </ng-container>
+                                                <div [ngClass]="status.limit && status.limit === filterSubTask(status.issues, false).length ? 'bg-red-500 text-white dark:bg-red-700' : 'bg-gray-300 text-secondary dark:bg-gray-700'"
+                                                    class="flex items-center justify-center min-w-6 ml-4 text-sm font-semibold leading-6 rounded-full">
+                                                    {{filterSubTask(status.issues, false).length}}
+                                                </div>
+                                                <div *ngIf="isOwner" class="ml-1">
+                                                    <button class="w-8 h-8 min-h-8" mat-icon-button
+                                                        [matMenuTriggerFor]="listMenu">
+                                                        <mat-icon class="icon-size-5"
+                                                            [svgIcon]="'heroicons_solid:dots-vertical'">
+                                                        </mat-icon>
+                                                    </button>
+                                                    <mat-menu #listMenu="matMenu">
+                                                        <button mat-menu-item (click)="renameList(listTitleInput)">
+                                                            <mat-icon class="icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:pencil-alt'">
+                                                            </mat-icon>
+                                                            Rename
+                                                        </button>
+                                                        <button *ngIf="project.statuses.length > 1" mat-menu-item
+                                                            (click)="deleteList(status)">
+                                                            <mat-icon class="icon-size-5"
+                                                                [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                            Delete
+                                                        </button>
+                                                    </mat-menu>
+                                                </div>
                                             </div>
 
+                                            <!-- Cards -->
+                                            <div
+                                                class="mt-2 items-stretch rounded-xl bg-gray-400 bg-opacity-12 dark:bg-transparent dark:border">
+                                                <div [id]="status.id" class="p-3 h-full" cdkDropList
+                                                    [cdkDropListData]="status.issues"
+                                                    (cdkDropListDropped)="cardDropped($event)">
+
+                                                    <!-- New card -->
+                                                    <scrumboard-board-add-card (saved)="addCard(status, $event)"
+                                                        [buttonTitle]="'Add issue'">
+                                                    </scrumboard-board-add-card>
+
+                                                    <!-- Card -->
+                                                    <ng-container
+                                                        *ngFor="let issue of filterSubTask(status.issues, false); trackBy: trackByFn">
+                                                        <ng-container *ngIf="!issue.isChild">
+                                                            <a class="flex flex-col items-start mb-3 p-5 space-y-3 shadow rounded-lg overflow-hidden bg-card"
+                                                                [routerLink]="['card', issue.id]" cdkDrag>
+                                                                <!-- Cover image -->
+                                                                <ng-container *ngIf="issue.coverImage">
+                                                                    <div class="-mx-5 -mt-5 mb-2">
+                                                                        <img class="w-full object-cover"
+                                                                            [src]="issue.coverImage">
+                                                                    </div>
+                                                                </ng-container>
+                                                                <!-- Title -->
+                                                                <div class="text-lg font-medium leading-5">
+                                                                    {{issue.name}}
+                                                                </div>
+                                                                <!-- Labels -->
+                                                                <ng-container
+                                                                    *ngIf="issue.labels && issue.labels.length">
+                                                                    <div>
+                                                                        <div class="flex flex-wrap -mx-1 -mb-2">
+                                                                            <ng-container
+                                                                                *ngFor="let label of issue.labels; trackBy: trackByFn">
+                                                                                <div
+                                                                                    class="mx-1 mb-2 py-0.5 px-3 rounded-full text-sm font-medium text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                                                                    {{label.name}}
+                                                                                </div>
+                                                                            </ng-container>
+                                                                        </div>
+                                                                    </div>
+                                                                </ng-container>
+
+                                                                <!-- Assignee -->
+                                                                <ng-container *ngIf="issue.assignee">
+                                                                    <div
+                                                                        class="flex items-center rounded text-sm text-blue-500 font-medium leading-5">
+                                                                        <mat-icon class="icon-size-4 text-current"
+                                                                            [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                                                                        <div class="ml-1">
+                                                                            {{ issue.assignee.name }}
+                                                                        </div>
+                                                                    </div>
+                                                                </ng-container>
+
+                                                                <!-- Due date -->
+                                                                <ng-container *ngIf="issue.dueDate">
+                                                                    <div class="flex items-center rounded text-sm font-medium leading-5 text-secondary"
+                                                                        [ngClass]="{'text-red-600': isOverdue(issue.dueDate) && !issue.isClose}">
+                                                                        <mat-icon class="icon-size-4 text-current"
+                                                                            [svgIcon]="'heroicons_outline:clock'"></mat-icon>
+                                                                        <div class="ml-1">
+                                                                            {{issue.dueDate | date: 'longDate'}}
+                                                                        </div>
+                                                                    </div>
+                                                                </ng-container>
+                                                            </a>
+                                                        </ng-container>
+                                                    </ng-container>
+                                                </div>
+
+                                            </div>
                                         </div>
-                                    </div>
-                                </ng-container>
+                                    </ng-container>
+
+                                </div>
 
                             </div>
+                        </ng-container>
 
-                        </div>
-                    </ng-container>
+                        <!-- New list -->
+                        <scrumboard-board-add-list *ngIf="isOwner" (saved)="addList($event)"
+                            [buttonTitle]="'Add a column'">
+                        </scrumboard-board-add-list>
 
-                    <!-- New list -->
-                    <scrumboard-board-add-list *ngIf="isOwner" (saved)="addList($event)" [buttonTitle]="'Add a column'">
-                    </scrumboard-board-add-list>
+                    </div>
 
                 </div>
+            </ng-container>
 
-            </div>
-        </ng-container>
+        </div>
+    </ng-container>
 
-    </div>
+    <ng-container *ngIf="project.isClose">
+        <error-404></error-404>
+    </ng-container>
 
 </div>
 
