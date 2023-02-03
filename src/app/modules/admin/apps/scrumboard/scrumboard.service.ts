@@ -999,4 +999,32 @@ export class ScrumboardService {
                 ))
         );
     }
+
+    /**
+ * Delete the child issue card
+ *
+ * @param id
+ */
+    deleteChildIssue(id: string): Observable<boolean> {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.delete('/api/issues/' + id).pipe(
+                map((isDeleted: boolean) => {
+
+                    // Find the card and delete it
+                    board.childIssues.forEach((cardItem, index, array) => {
+                        if (cardItem.id === id) {
+                            array.splice(index, 1);
+                        }
+                    });
+
+                    // Update the card
+                    this._issue.next(board);
+
+                    // Return the deleted status
+                    return isDeleted;
+                })
+            ))
+        );
+    }
 }

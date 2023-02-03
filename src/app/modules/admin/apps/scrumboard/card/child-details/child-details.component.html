@@ -7,7 +7,7 @@
             <div>Sub Task</div>
         </div>
         <div class="flex items-center gap-3">
-            <button mat-icon-button>
+            <button mat-icon-button (click)="removeChildIssue(child.id)">
                 <mat-icon class="text-red-500" [svgIcon]="'mat_outline:delete_outline'"></mat-icon>
             </button>
             <button mat-icon-button [matDialogClose]="undefined" [tabIndex]="-1">

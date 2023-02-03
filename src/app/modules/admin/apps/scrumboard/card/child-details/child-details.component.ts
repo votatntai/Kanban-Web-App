@@ -383,4 +383,16 @@ export class ChildDetailsComponent implements OnInit {
             }
         })
     }
+
+    removeChildIssue(id: string) {
+        this._fuseConfirmationService.open().afterClosed().subscribe(result => {
+            if (result === 'confirmed') {
+                this._scrumboardService.deleteChildIssue(id).subscribe(result => {
+                    this.dialogRef.close();
+                    this._changeDetectorRef.markForCheck();
+                })
+            }
+        })
+    }
+
 }
