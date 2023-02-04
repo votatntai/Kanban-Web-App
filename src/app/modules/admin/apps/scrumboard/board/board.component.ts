@@ -339,6 +339,15 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
         return item.id || index;
     }
 
+    countDoneChilIssue(issue: Issue) {
+        return issue.childIssues.filter(child => {
+            if (child.isClose) {
+                return true;
+            }
+            return false;
+        }).length
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Private methods
     // -----------------------------------------------------------------------------------------------------

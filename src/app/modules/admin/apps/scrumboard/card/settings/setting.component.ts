@@ -1,3 +1,4 @@
+import { Status } from './../../kanban.model';
 import { user } from './../../../../../../mock-api/common/user/data';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, Validators, UntypedFormGroup } from '@angular/forms';
@@ -52,15 +53,14 @@ export class SettingComponent implements OnInit {
                     this.isOwner = false;
                 }
 
+                this.canDone = this.checkProjectCanMakeDone(this.project.statuses);
+
                 // Check is project can make done
-                this.project.statuses.forEach(status => {
-                    status.issues.forEach(issue => {
-                        this.canDone = false;
-                        if (!issue.isChild && issue.isClose) {
-                            this.canDone = true;
-                        }
-                    })
-                })
+                // this.project.statuses.forEach(status => {
+                //     status.issues.every(issue => {
+                //         this.canDone = issue.isClose == true;
+                //     })
+                // })
             });
 
         // Init project form
@@ -69,6 +69,35 @@ export class SettingComponent implements OnInit {
             description: [this.project.description],
             leaderId: [this.project.leader.id]
         });
+    }
+
+    checkProjectCanMakeDone(statuses: Status[]) {
+        var totalIssue = 0;
+        var closedIssue = 0;
+        statuses.forEach(status => {
+            status.issues.forEach(issue => {
+                totalIssue += 1;
+                issue.childIssues.forEach(child => {
+                    totalIssue += 1;
+                })
+            })
+        })
+        statuses.forEach(status => {
+            status.issues.forEach(issue => {
+                if (issue.isClose) {
+                    closedIssue += 1;
+                }
+                issue.childIssues.forEach(child => {
+                    if (child.isClose) {
+                        closedIssue += 1;
+                    }
+                })
+            })
+        })
+        if (totalIssue === closedIssue) {
+            return true;
+        }
+        return false;
     }
 
     updateProject() {

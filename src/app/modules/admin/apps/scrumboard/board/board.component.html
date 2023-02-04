@@ -160,6 +160,20 @@
                                                                         </div>
                                                                     </div>
                                                                 </ng-container>
+
+                                                                <ng-container
+                                                                    *ngIf="issue.childIssues && issue.childIssues.length > 0">
+                                                                    <div class="flex gap-3 text-sm font-medium">
+                                                                        <mat-icon class="text-blue-500 icon-size-4"
+                                                                            svgIcon="heroicons_outline:adjustments"></mat-icon>
+                                                                        <span>
+                                                                            {{ countDoneChilIssue(issue)}} of
+                                                                            {{issue.childIssues.length }}
+                                                                        </span>
+                                                                    </div>
+
+                                                                </ng-container>
+
                                                             </a>
                                                         </ng-container>
                                                     </ng-container>
