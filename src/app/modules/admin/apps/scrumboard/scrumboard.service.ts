@@ -1026,7 +1026,7 @@ export class ScrumboardService {
     }
 
     getFile(id: string) {
-        return this._httpClient.get<any>('/api/attachments/' + id)
+        return this._httpClient.get('/api/attachments/' + id, { responseType: 'arraybuffer' })
     }
 
     saveFile(issueId: string, data: FormData) {
@@ -1037,6 +1037,28 @@ export class ScrumboardService {
 
                     // Update the board labels with the new label
                     board.attachments = [...board.attachments, newAttachment];
+
+                    // Update the board
+                    this._issue.next(board);
+
+                    // Return new label from observable
+                    return newAttachment;
+                })
+            ))
+        );
+    }
+
+    saveFileForChild(issueId: string, data: FormData) {
+        return this.issue$.pipe(
+            take(1),
+            switchMap(board => this._httpClient.post<any>('/api/attachments', data, { params: { issueId: issueId } }).pipe(
+                map((newAttachment) => {
+
+                    board.childIssues.forEach(child => {
+                        if (child.id === issueId) {
+                            child.attachments = [...child.attachments, newAttachment]
+                        }
+                    })
 
                     // Update the board
                     this._issue.next(board);

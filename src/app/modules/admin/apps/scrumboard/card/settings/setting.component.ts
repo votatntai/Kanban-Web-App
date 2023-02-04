@@ -54,13 +54,6 @@ export class SettingComponent implements OnInit {
                 }
 
                 this.canDone = this.checkProjectCanMakeDone(this.project.statuses);
-
-                // Check is project can make done
-                // this.project.statuses.forEach(status => {
-                //     status.issues.every(issue => {
-                //         this.canDone = issue.isClose == true;
-                //     })
-                // })
             });
 
         // Init project form

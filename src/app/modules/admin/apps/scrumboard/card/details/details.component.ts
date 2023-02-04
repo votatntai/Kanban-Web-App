@@ -7,7 +7,7 @@ import { FuseConfirmationService } from '@fuse/services/confirmation/confirmatio
 import { ScrumboardService } from 'app/modules/admin/apps/scrumboard/scrumboard.service';
 import { DateTime } from 'luxon';
 import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
-import { Issue, Label, LogWork, Member, Priority, Project } from './../../kanban.model';
+import { Attachment, Issue, Label, LogWork, Member, Priority, Project } from './../../kanban.model';
 import { ChildDetailsComponent } from './../child-details/child-details.component';
 import { LogWorkComponent } from './log-work/log-work.component';
 
@@ -218,18 +218,17 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
 
         this._scrumboardService.saveFile(this.issue.id, formData).subscribe(result => {
             if (result) {
-                console.log(result);
                 this._changeDetectorRef.markForCheck();
             }
         })
     }
 
-    downloadFileAttachment(id: string) {
-        this._scrumboardService.getFile(id).subscribe(result => {
-            const blob = new Blob([result.file], { type: 'application/octet-stream' });
+    downloadFileAttachment(attachment: Attachment) {
+        this._scrumboardService.getFile(attachment.id).subscribe(result => {
+            const blob = new Blob([result], { type: 'application/octet-stream' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = result.name;
+            link.download = attachment.name;
             link.click();
         })
     }

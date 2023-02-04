@@ -4,7 +4,7 @@
     <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 shadow">
         <div class="flex items-center gap-3">
             <mat-icon class="text-blue-500" svgIcon="heroicons_outline:bookmark"></mat-icon>
-            <div (click)="downloadFileAttachment('s')">{{ issue.type.name }}</div>
+            <div>{{ issue.type.name }}</div>
         </div>
         <div class="flex items-center gap-3">
             <ng-container *ngIf="issue.isClose">
@@ -43,7 +43,7 @@
 
                 <div class="flex flex-wrap gap-3 mb-3">
 
-                    <input class="hidden" type="file" accept="image/*" #file (change)="uploadFileAttachment($event)">
+                    <input class="hidden" type="file" #file (change)="uploadFileAttachment($event)">
                     <button class="" mat-stroked-button (click)="file.click()">
                         <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:document-add'"></mat-icon>
                         Attach
@@ -72,7 +72,7 @@
                                     <div class="aspect-[9/6]">
                                         <div class="flex items-center justify-center h-full">
                                             <!-- Icons -->
-                                            <div class="relative" (click)="downloadFileAttachment(attachment.id)">
+                                            <div class="relative" (click)="downloadFileAttachment(attachment)">
                                                 <mat-icon class="icon-size-14 text-hint opacity-50"
                                                     [svgIcon]="'heroicons_solid:document'"></mat-icon>
                                                 <div class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
@@ -84,7 +84,7 @@
                                     </div>
                                     <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
                                         <div class="truncate" [matTooltip]="attachment.name"
-                                            (click)="downloadFileAttachment(attachment.id)">{{
+                                            (click)="downloadFileAttachment(attachment)">{{
                                             attachment.name.split('.')[0] }}</div>
                                     </div>
                                 </a>
@@ -105,7 +105,17 @@
                                     <div class="max-w-60">{{ child.name }}</div>
                                 </div>
                                 <div class="flex w-full gap-4 items-center justify-end">
-                                    <mat-icon svgIcon="mat_outline:menu"></mat-icon>
+                                    <mat-icon [svgIcon]="child.priority.name == 'Medium' ? 'heroicons_outline:menu' : '' ||
+                                    child.priority.name == 'Low' ? 'heroicons_outline:chevron-down' : '' ||
+                                    child.priority.name == 'Lowest' ? 'heroicons_outline:chevron-double-down' : '' ||
+                                    child.priority.name == 'High' ? 'heroicons_outline:chevron-up' : '' ||
+                                    child.priority.name == 'Highest' ? 'heroicons_outline:chevron-double-up' : ''"
+                                        [ngClass]="child.priority.name == 'Medium' ? 'text-yellow-500' : '' ||
+                                    child.priority.name == 'Low' ? 'text-blue-700' : '' ||
+                                    child.priority.name == 'Lowest' ? 'text-blue-500' : '' ||
+                                    child.priority.name == 'High' ? 'text-red-500' : '' ||
+                                    child.priority.name == 'Highest' ? 'text-red-700' : ''">
+                                    </mat-icon>
                                     <div class="flex gap-2">
                                         <mat-icon svgIcon="heroicons_outline:user-circle"></mat-icon>
                                         <div *ngIf="!child.assignee">

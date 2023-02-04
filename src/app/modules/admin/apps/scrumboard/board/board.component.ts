@@ -100,8 +100,10 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
 
         this._scrumboardService.issue$.subscribe(issue => {
             this.selectedIssue = issue;
-            this.countDoneChilIssue(issue);
-            this._changeDetectorRef.markForCheck();
+            if (issue) {
+                this.countDoneChilIssue(issue);
+                this._changeDetectorRef.markForCheck();
+            }
         })
     }
 

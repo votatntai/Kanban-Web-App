@@ -1,5 +1,5 @@
 import { FuseConfirmationService } from './../../../../../../../@fuse/services/confirmation/confirmation.service';
-import { Label, Project } from './../../kanban.model';
+import { Attachment, Label, Project } from './../../kanban.model';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -392,6 +392,28 @@ export class ChildDetailsComponent implements OnInit {
                     this._changeDetectorRef.markForCheck();
                 })
             }
+        })
+    }
+
+    uploadFileAttachment(event) {
+        const file = event.target.files[0];
+        const formData = new FormData();
+        formData.append('file', file, file.name);
+
+        this._scrumboardService.saveFileForChild(this.child.id, formData).subscribe(result => {
+            if (result) {
+                this._changeDetectorRef.markForCheck();
+            }
+        })
+    }
+
+    downloadFileAttachment(attachment: Attachment) {
+        this._scrumboardService.getFile(attachment.id).subscribe(result => {
+            const blob = new Blob([result], { type: 'application/octet-stream' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = attachment.name;
+            link.click();
         })
     }
 
