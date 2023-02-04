@@ -127,7 +127,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
             description: this.issue.description,
             labels: this.issue.labels,
             estimateTime: this.issue.estimateTime,
-            priorityId: this.issue.priorityId,
+            priorityId: this.issue.priority.id,
             reporterId: this.issue.reporter.id,
             statusId: this.issue.statusId,
             assigneeId: this.issue.assignee?.id || null,
@@ -196,7 +196,7 @@ export class ScrumboardCardDetailsComponent implements OnInit, OnDestroy {
         this.childIssueForm = this._formBuilder.group({
             name: ['', Validators.required],
             description: [''],
-            priorityId: [this.issue.priorityId, Validators.required],
+            priorityId: [this.issue.priority.id, Validators.required],
             statusId: [this.issue.statusId, Validators.required],
             parentId: [this.issue.id, Validators.required],
             projectId: [this.issue.projectId, Validators.required]

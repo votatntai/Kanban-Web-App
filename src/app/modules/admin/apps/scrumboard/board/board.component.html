@@ -161,18 +161,39 @@
                                                                     </div>
                                                                 </ng-container>
 
-                                                                <ng-container
-                                                                    *ngIf="issue.childIssues && issue.childIssues.length > 0">
-                                                                    <div class="flex gap-3 text-sm font-medium">
-                                                                        <mat-icon class="text-blue-500 icon-size-4"
-                                                                            svgIcon="heroicons_outline:adjustments"></mat-icon>
-                                                                        <span>
-                                                                            {{ countDoneChilIssue(issue)}} of
-                                                                            {{issue.childIssues.length }}
-                                                                        </span>
+                                                                <div class="flex w-full justify-between">
+
+                                                                    <div class="flex text-sm font-medium items-center">
+                                                                        <mat-icon class="icon-size-4"
+                                                                            [svgIcon]="issue.priority.name == 'Medium' ? 'heroicons_outline:menu' : '' ||
+                                                                            issue.priority.name == 'Low' ? 'heroicons_outline:chevron-down' : '' ||
+                                                                            issue.priority.name == 'Lowest' ? 'heroicons_outline:chevron-double-down' : '' ||
+                                                                            issue.priority.name == 'High' ? 'heroicons_outline:chevron-up' : '' ||
+                                                                            issue.priority.name == 'Highest' ? 'heroicons_outline:chevron-double-up' : ''"
+                                                                            [ngClass]="issue.priority.name == 'Medium' ? 'text-yellow-500' : '' ||
+                                                                            issue.priority.name == 'Low' ? 'text-blue-700' : '' ||
+                                                                            issue.priority.name == 'Lowest' ? 'text-blue-500' : '' ||
+                                                                            issue.priority.name == 'High' ? 'text-red-500' : '' ||
+                                                                            issue.priority.name == 'Highest' ? 'text-red-700' : ''">
+                                                                        </mat-icon>
                                                                     </div>
 
-                                                                </ng-container>
+                                                                    <ng-container
+                                                                        *ngIf="issue.childIssues && issue.childIssues.length > 0">
+                                                                        <div
+                                                                            class="flex gap-3 text-sm font-medium items-center">
+                                                                            <mat-icon class="text-blue-500 icon-size-4"
+                                                                                svgIcon="heroicons_outline:adjustments"></mat-icon>
+                                                                            <span>
+                                                                                {{ countDoneChilIssue(issue)}} of
+                                                                                {{issue.childIssues.length }}
+                                                                            </span>
+                                                                        </div>
+
+                                                                    </ng-container>
+
+
+                                                                </div>
 
                                                             </a>
                                                         </ng-container>

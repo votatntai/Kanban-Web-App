@@ -9,6 +9,7 @@ export interface IProject {
     priorities?: IPriority[];
     members?: IMember[];
     isClose: boolean;
+    createAt: string;
 }
 
 export interface IStatus {
@@ -36,7 +37,7 @@ export interface IIssue {
     attachments?: IAttachment[];
     logWorks?: ILogWork[];
     dueDate?: string | null;
-    priorityId?: string | null;
+    priority?: IPriority | null;
     assignee?: IMember | null;
     reporter?: IMember | null;
     childIssues?: any[];

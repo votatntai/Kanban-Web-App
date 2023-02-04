@@ -15,6 +15,7 @@ export class Project implements Required<IProject>
     priorities: Priority[];
     members: Member[];
     isClose: boolean;
+    createAt: string;
 
     /**
      * Constructor
@@ -30,6 +31,7 @@ export class Project implements Required<IProject>
         this.priorities = [];
         this.members = [];
         this.isClose = board.isClose;
+        this.createAt = board.createAt;
 
         // Lists
         if (board.statuses) {
@@ -135,7 +137,7 @@ export class Issue implements Required<IIssue>
     logWorks: LogWork[];
     comments: Comment[];
     dueDate: string | null;
-    priorityId: string | null;
+    priority: Priority | null;
     assignee: IMember | null;
     reporter: IMember | null;
     estimateTime: number | null;
@@ -163,7 +165,7 @@ export class Issue implements Required<IIssue>
         this.logWorks = [];
         this.comments = [];
         this.dueDate = card.dueDate || null;
-        this.priorityId = card.priorityId || null;
+        this.priority = card.priority || null;
         this.assignee = card.assignee || null;
         this.childIssues = [];
         this.reporter = card.reporter || null;

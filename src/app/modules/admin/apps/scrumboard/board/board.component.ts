@@ -24,6 +24,7 @@ import { RemoveStatusDialogComponent } from './remove-status-dialog/remove-statu
 export class ScrumboardBoardComponent implements OnInit, OnDestroy {
     board: Board;
     project: Project;
+    selectedIssue: Issue;
     listTitleForm: UntypedFormGroup;
     filterMode: 'Default' | 'Subtask' = 'Default';
     user: any;
@@ -96,6 +97,12 @@ export class ScrumboardBoardComponent implements OnInit, OnDestroy {
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+
+        this._scrumboardService.issue$.subscribe(issue => {
+            this.selectedIssue = issue;
+            this.countDoneChilIssue(issue);
+            this._changeDetectorRef.markForCheck();
+        })
     }
 
     /**

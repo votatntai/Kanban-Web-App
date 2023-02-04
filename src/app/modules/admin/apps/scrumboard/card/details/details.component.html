@@ -342,7 +342,7 @@
 
                 <mat-form-field class="w-full">
                     <mat-label>Priority</mat-label>
-                    <mat-select [(value)]="issue.priorityId" (selectionChange)="priorityChanged($event)">
+                    <mat-select [(value)]="issue.priority.id" (selectionChange)="priorityChanged($event)">
                         <mat-option *ngFor="let priority  of project.priorities" [value]="priority.id">
                             <mat-icon [svgIcon]="priority.name == 'Medium' ? 'heroicons_outline:menu' : '' ||
                                 priority.name == 'Low' ? 'heroicons_outline:chevron-down' : '' ||
