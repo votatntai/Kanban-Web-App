@@ -53,7 +53,7 @@ export class SettingComponent implements OnInit {
                     this.isOwner = false;
                 }
 
-                this.canDone = this.checkProjectCanMakeDone(this.project.statuses);
+                this.canDone = this.checkProjectCanMakeDone(board);
             });
 
         // Init project form
@@ -64,33 +64,13 @@ export class SettingComponent implements OnInit {
         });
     }
 
-    checkProjectCanMakeDone(statuses: Status[]) {
-        var totalIssue = 0;
-        var closedIssue = 0;
-        statuses.forEach(status => {
-            status.issues.forEach(issue => {
-                totalIssue += 1;
-                issue.childIssues.forEach(child => {
-                    totalIssue += 1;
-                })
-            })
-        })
-        statuses.forEach(status => {
-            status.issues.forEach(issue => {
-                if (issue.isClose) {
-                    closedIssue += 1;
-                }
-                issue.childIssues.forEach(child => {
-                    if (child.isClose) {
-                        closedIssue += 1;
-                    }
-                })
-            })
-        })
-        if (totalIssue === closedIssue) {
-            return true;
-        }
-        return false;
+    checkProjectCanMakeDone(board) {
+        return board.statuses.every(status =>
+            status.issues.every(issue =>
+                issue.isClose &&
+                (issue.childIssues.length === 0 || issue.childIssues.every(child => child.isClose))
+            )
+        );
     }
 
     updateProject() {
